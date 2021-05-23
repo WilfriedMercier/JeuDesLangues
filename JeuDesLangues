@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Mercier Wilfried - IRAP
+# Bash wrapper to run the "JeuDesLangues" program
+
+python3 __main__.py
+return #?
