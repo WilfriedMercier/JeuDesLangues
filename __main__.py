@@ -7,8 +7,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 import os
 import os.path         as     opath
 
-from   PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout
-from   PyQt5.QtGui     import QIcon, QBitmap
+from   PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog
 from   PyQt5.QtCore    import Qt, pyqtSlot
 
 # Custom backend functions
@@ -26,13 +25,12 @@ class App(QMainWindow):
       self.scriptDir  = opath.dirname(opath.realpath(__file__))
 
       # Setup program icons
-      conf, ok        = bkd.loadIcons(iconsPath=iconsPath)
+      conf, ok        = bkd.loadIcons(self.scriptDir, iconsPath)
+      corpus          = conf['corpus']
+      icons           = conf['icons']
 
       if not ok:
          raise IOError('You are missing the %s directory which contains program icons.' %iconsPath)
-      else:
-         for key, value in conf.items():
-            conf[key] = QIcon(QBitmap(value))
 
       # Window and layout
       self.win        = QWidget()
@@ -48,12 +46,14 @@ class App(QMainWindow):
       self.inputText.setAlignment(Qt.AlignTop)
 
       # Top line input entry
-      self.inputEntry = QLineEdit('')
+      self.inputEntry = QLineEdit(corpus)
       self.inputEntry.setAlignment(Qt.AlignTop)
-      self.inputEntry.setToolTip('Enter a valide corpus file name to generate sentences from')
+      self.inputEntry.setToolTip('Enter a corpus file name to generate sentences from')
 
       # Top line input button
       self.inputButton = QPushButton('')
+      self.inputButton.setIcon(conf['FOLDER'])
+      self.inputButton.setFlat(True)
       self.inputButton.setToolTip('Select a corpus text file to generate sentences from')
       self.inputButton.clicked.connect(self.selectCorpus)
 
@@ -78,7 +78,8 @@ class App(QMainWindow):
    def selectCorpus(self, *args, **kwargs):
       '''Generate  window to select a corpus text file.'''
 
-      print('Clicked')
+      file = QFileDialog(self.win).getOpenFileName(caption='Title', directory=opath.join(self.scriptDir, 'corpus'), filter='*.txt')
+      print(file)
       return
 
 if __name__ == '__main__':
