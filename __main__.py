@@ -21,16 +21,26 @@ class App(QMainWindow):
 
       super().__init__()
 
+
+      ###############################
+      #        Initial setup        #
+      ###############################
+
       # Script current dir
       self.scriptDir  = opath.dirname(opath.realpath(__file__))
 
-      # Setup program icons
-      conf, ok        = bkd.loadIcons(self.scriptDir, iconsPath)
-      corpus          = conf['corpus']
-      icons           = conf['icons']
+      conf, ok, msg   = bkd.setup(self.scriptDir, 'configuration.yaml')
 
       if not ok:
-         raise IOError('You are missing the %s directory which contains program icons.' %iconsPath)
+         raise IOError(msg)
+
+      # Corpus
+      self.corpusDir  = conf['corpusDir']
+      self.corpusName = conf['corpusName']
+      self.corpusText = conf['corpusText']
+
+      # Icons
+      self.icons      = conf['icons']
 
       # Window and layout
       self.win        = QWidget()
@@ -46,13 +56,13 @@ class App(QMainWindow):
       self.inputText.setAlignment(Qt.AlignTop)
 
       # Top line input entry
-      self.inputEntry = QLineEdit(corpus)
+      self.inputEntry = QLineEdit(self.corpusName)
       self.inputEntry.setAlignment(Qt.AlignTop)
       self.inputEntry.setToolTip('Enter a corpus file name to generate sentences from')
 
       # Top line input button
       self.inputButton = QPushButton('')
-      self.inputButton.setIcon(conf['FOLDER'])
+      self.inputButton.setIcon(self.icons['FOLDER'])
       self.inputButton.setFlat(True)
       self.inputButton.setToolTip('Select a corpus text file to generate sentences from')
       self.inputButton.clicked.connect(self.selectCorpus)
@@ -78,7 +88,7 @@ class App(QMainWindow):
    def selectCorpus(self, *args, **kwargs):
       '''Generate  window to select a corpus text file.'''
 
-      file = QFileDialog(self.win).getOpenFileName(caption='Title', directory=opath.join(self.scriptDir, 'corpus'), filter='*.txt')
+      file = QFileDialog(self.win).getOpenFileName(caption='Title', directory=opath.join(self.corpusDir), filter='*.txt')
       print(file)
       return
 
