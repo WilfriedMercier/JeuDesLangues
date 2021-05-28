@@ -7,8 +7,9 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 import os
 import os.path         as     opath
 
-from   PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog
+from   PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut
 from   PyQt5.QtCore    import Qt, pyqtSlot
+from   PyQt5.QtGui     import QKeySequence
 
 # Custom backend functions
 import backend         as     bkd
@@ -65,7 +66,7 @@ class App(QMainWindow):
       self.inputButton.setIcon(self.icons['FOLDER'])
       self.inputButton.setFlat(True)
       self.inputButton.setToolTip('Select a corpus text file to generate sentences from')
-      self.inputButton.clicked.connect(self.selectCorpus)
+      self.inputButton.clicked.connect(self.loadCorpus)
 
 
       ################################################
@@ -80,17 +81,89 @@ class App(QMainWindow):
       self.layout.setAlignment(Qt.AlignTop)
       self.win.setLayout(self.layout)
 
+
+      ###############################################
+      #               Setup shortcuts               #
+      ###############################################
+
+      self.shortcuts           = {}
+      self.shortcuts['Ctrl+O'] = QShortcut(QKeySequence('Ctrl+O'), self.win)
+      self.shortcuts['Ctrl+O'].activated.connect(self.loadCorpus)
+
       # Show application
       self.win.show()
 
 
-   @pyqtSlot()
-   def selectCorpus(self, *args, **kwargs):
-      '''Generate  window to select a corpus text file.'''
+   #############################################
+   #           Corpus related methods          #
+   #############################################
 
-      file = QFileDialog(self.win).getOpenFileName(caption='Title', directory=opath.join(self.corpusDir), filter='*.txt')
-      print(file)
+   @pyqtSlot()
+   def loadCorpus(self, *args, **kwargs):
+      '''
+      Slot used to load a new corpus file.
+      '''
+
+      corpus = self.selectCorpus(*args, **kwargs)
+
+      if corpus is not None:
+
+         # Update corpus properties first (dir, file name and text)
+         self._updateCorpusProp(corpus)
+
+         # Update corpus entry widget
+         self._changeCorpusEntry(self.corpusName)
+
       return
+
+   def _updateCorpusProp(self, file, *args, **kwargs):
+      '''
+      Update corpus properties.
+
+      :param str file: file name to retrieve the text from
+      '''
+
+      dir, name = opath.split(file)
+      with open(file, 'r') as f:
+         text = f.read()
+
+      # Update corpus properties
+      self.corpusDir  = dir
+      self.corpusName = name
+      self.corpusText = text
+
+      return
+
+   def selectCorpus(self, *args, **kwargs):
+      '''
+      Generate a window to select a corpus text file.
+
+      :rtype: file name if ok, None otherwise
+      :rtype: str if ok, None otherwise
+      '''
+
+      dialog = QFileDialog(self.win)
+      file   = dialog.getOpenFileName(caption='Load a corpus file...', directory=opath.join(self.corpusDir), filter='*.txt')[0]
+
+      if file != '':
+         return file
+      else:
+         return None
+
+
+   ############################################
+   #          Widgets related actions         #
+   ############################################
+
+   def _changeCorpusEntry(self, name, *args, **kwargs):
+      '''
+      Change the corpus entry widget value.
+      '''
+
+      self.inputEntry.setText(name)
+      return
+
+
 
 if __name__ == '__main__':
    root   = QApplication(sys.argv)
