@@ -7,9 +7,9 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 import os
 import os.path         as     opath
 
-from   PyQt5.QtWidgets import QMainWindow, QApplication, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut
+from   PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget
 from   PyQt5.QtCore    import Qt, pyqtSlot
-from   PyQt5.QtGui     import QKeySequence
+from   PyQt5.QtGui     import QKeySequence, QPalette, QColor
 
 # Custom backend functions
 import backend         as     bkd
@@ -17,11 +17,11 @@ import backend         as     bkd
 class App(QMainWindow):
    '''Main application.'''
 
-   def __init__(self, iconsPath='icons', *args, **kwargs):
+   def __init__(self, root, iconsPath='icons', *args, **kwargs):
       '''Initialise the application.'''
 
+      self.root       = root
       super().__init__()
-
 
       ###############################
       #        Initial setup        #
@@ -43,14 +43,36 @@ class App(QMainWindow):
       # Icons
       self.icons      = conf['icons']
 
-      # Window and layout
-      self.win        = QWidget()
-      self.layout     = QGridLayout()
+      # Window
+      self.win            = QWidget()
       self.win.setWindowTitle('Jeu des langues (EBTP)')
+      self.layoutWin      = QGridLayout()
 
-      ##########################################
-      #              Setup widgets             #
-      ##########################################
+      # Tabs
+      self.tabs           = QTabWidget()
+
+      self.tabMain        = QWidget()
+      self.layoutMain     = QGridLayout()
+
+      self.tabSettings    = QWidget()
+      self.layoutSettings = QGridLayout()
+
+
+      ############################################
+      #           Common color palettes          #
+      ############################################
+
+      self.okPalette    = QPalette()
+      green             = QColor('darkgreen')
+      self.okPalette.setColor(QPalette.Text, green)
+
+      self.errorPalette = QPalette()
+      red             = QColor('firebrick')
+      self.errorPalette.setColor(QPalette.Text, red)
+
+      #############################################
+      #              Settings widgets             #
+      #############################################
 
       # Top line input text
       self.inputText  = QLabel('Corpus file')
@@ -60,6 +82,8 @@ class App(QMainWindow):
       self.inputEntry = QLineEdit(self.corpusName)
       self.inputEntry.setAlignment(Qt.AlignTop)
       self.inputEntry.setToolTip('Enter a corpus file name to generate sentences from')
+      self.inputEntry.setPalette(self.okPalette)
+      self.inputEntry.textEdited.connect(self.checkAndLoadCorpus)
 
       # Top line input button
       self.inputButton = QPushButton('')
@@ -73,14 +97,23 @@ class App(QMainWindow):
       #                 Setup layout                 #
       ################################################
 
-      # First pack of widgets
-      self.layout.addWidget(self.inputText,   1, 1)
-      self.layout.addWidget(self.inputEntry,  2, 1)
-      self.layout.addWidget(self.inputButton, 2, 2)
+      # Main tab widgets layout
+      self.layoutMain.setAlignment(Qt.AlignTop)
+      self.tabMain.setLayout(self.layoutMain)
+      self.tabs.addTab(self.tabMain, "&Game")
 
-      self.layout.setAlignment(Qt.AlignTop)
-      self.win.setLayout(self.layout)
+      # Settings tab widgets layout
+      self.layoutSettings.addWidget(self.inputText,   1, 1)
+      self.layoutSettings.addWidget(self.inputEntry,  2, 1)
+      self.layoutSettings.addWidget(self.inputButton, 2, 2)
 
+      self.layoutSettings.setAlignment(Qt.AlignTop)
+      self.tabSettings.setLayout(self.layoutSettings)
+      self.tabs.addTab(self.tabSettings, "&Settings")
+
+      # Main window layout
+      self.layoutWin.addWidget(self.tabs, 1, 1)
+      self.win.setLayout(self.layoutWin)
 
       ###############################################
       #               Setup shortcuts               #
@@ -91,30 +124,14 @@ class App(QMainWindow):
       self.shortcuts['Ctrl+O'].activated.connect(self.loadCorpus)
 
       # Show application
+      self.win.resize(800, 800)
       self.win.show()
+      self.centre()
 
 
    #############################################
    #           Corpus related methods          #
    #############################################
-
-   @pyqtSlot()
-   def loadCorpus(self, *args, **kwargs):
-      '''
-      Slot used to load a new corpus file.
-      '''
-
-      corpus = self.selectCorpus(*args, **kwargs)
-
-      if corpus is not None:
-
-         # Update corpus properties first (dir, file name and text)
-         self._updateCorpusProp(corpus)
-
-         # Update corpus entry widget
-         self._changeCorpusEntry(self.corpusName)
-
-      return
 
    def _updateCorpusProp(self, file, *args, **kwargs):
       '''
@@ -134,6 +151,47 @@ class App(QMainWindow):
 
       return
 
+   def errorCorpus(self, *args, **kwargs):
+      '''Fonction called when the corpus file is not ok.'''
+
+      self.inputEntry.setPalette(self.errorPalette)
+      return
+
+   def checkAndLoadCorpus(self, file, *args, **kwargs):
+      '''Check that a corpus file and load it if it is fine.'''
+
+      if opath.isfile(file) and file.split('.')[-1]:
+         self._updateCorpusProp(file)
+         self.okCorpus()
+      else:
+         self.errorCorpus()
+
+      return
+
+   @pyqtSlot()
+   def loadCorpus(self, *args, **kwargs):
+      '''
+      Slot used to load a new corpus file.
+      '''
+
+      corpus = self.selectCorpus(*args, **kwargs)
+
+      if corpus is not None:
+
+         # Update corpus properties first (dir, file name and text)
+         self._updateCorpusProp(corpus)
+
+         # Update corpus entry widget
+         self._changeCorpusEntry(self.corpusName)
+
+      return
+
+   def okCorpus(self, *args, **kwargs):
+      '''Fonction called when the corpus file is ok.'''
+
+      self.inputEntry.setPalette(self.okPalette)
+      return
+
    def selectCorpus(self, *args, **kwargs):
       '''
       Generate a window to select a corpus text file.
@@ -145,7 +203,7 @@ class App(QMainWindow):
       dialog = QFileDialog(self.win)
       file   = dialog.getOpenFileName(caption='Load a corpus file...', directory=opath.join(self.corpusDir), filter='*.txt')[0]
 
-      if file != '':
+      if self.checkFile(file):
          return file
       else:
          return None
@@ -164,8 +222,39 @@ class App(QMainWindow):
       return
 
 
+   ##################################
+   #          Miscellaneous         #
+   ##################################
+
+   def centre(self, *args, **kwargs):
+      '''Centre the window.'''
+
+      frameGm     = self.frameGeometry()
+      screen      = self.root.desktop().screenNumber(self.root.desktop().cursor().pos())
+      centerPoint = self.root.desktop().screenGeometry(screen).center()
+      centerPoint.setY(centerPoint.y() - 100)
+      centerPoint.setX(centerPoint.x() - 100)
+      frameGm.moveCenter(centerPoint)
+      self.win.move(frameGm.topLeft())
+
+      return
+
+   def checkFile(self, file, *args, **kwargs):
+      '''
+      Check that the given file exists.
+
+      :param str file: file to check
+
+      :returns: True if file exists, False otherwise
+      :rtype: boolean
+      '''
+
+      if opath.isfile(file):
+         return True
+      else:
+         return False
 
 if __name__ == '__main__':
    root   = QApplication(sys.argv)
-   app    = App()
+   app    = App(root)
    sys.exit(root.exec_())
