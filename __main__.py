@@ -7,7 +7,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 import os
 import os.path         as     opath
 
-from   PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget
+from   PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox
 from   PyQt5.QtCore    import Qt, pyqtSlot
 from   PyQt5.QtGui     import QKeySequence, QPalette, QColor
 
@@ -92,6 +92,28 @@ class App(QMainWindow):
       self.inputButton.setToolTip('Select a corpus text file to generate sentences from')
       self.inputButton.clicked.connect(self.loadCorpus)
 
+      # Second line minimum words text
+      self.minwordText = QLabel('Minimum number of words')
+      self.minwordText.setAlignment(Qt.AlignTop)
+
+      # Second line minimum words spinbox
+      self.minwordSpin = QSpinBox()
+      self.minwordSpin.setSuffix(' words')
+      self.minwordSpin.setValue(3)
+      self.minwordSpin.setMinimum(1)
+      self.minwordSpin.setMaximum(10)
+      self.minwordSpin.valueChanged.connect(self._minimumWordsChanged)
+
+      # Second line maximum words text
+      self.maxwordText = QLabel('Maximum number of words')
+      self.maxwordText.setAlignment(Qt.AlignTop)
+
+      # Second line maximum words spinbox
+      self.maxwordSpin = QSpinBox()
+      self.maxwordSpin.setSuffix(' words')
+      self.maxwordSpin.setValue(10)
+      self.maxwordSpin.setMinimum(3)
+      self.maxwordSpin.valueChanged.connect(self._maximumWordsChanged)
 
       ################################################
       #                 Setup layout                 #
@@ -104,9 +126,17 @@ class App(QMainWindow):
 
       # Settings tab widgets layout
       self.layoutSettings.addWidget(self.inputText,   1, 1)
-      self.layoutSettings.addWidget(self.inputEntry,  2, 1)
-      self.layoutSettings.addWidget(self.inputButton, 2, 2)
+      self.layoutSettings.addWidget(self.inputEntry,  2, 1, 1, 2)
+      self.layoutSettings.addWidget(self.inputButton, 2, 3)
 
+      self.layoutSettings.addWidget(self.minwordText, 3, 1)
+      self.layoutSettings.addWidget(self.minwordSpin, 4, 1)
+
+      self.layoutSettings.addWidget(self.maxwordText, 3, 2)
+      self.layoutSettings.addWidget(self.maxwordSpin, 4, 2)
+
+      self.layoutSettings.setColumnStretch(1, 1)
+      self.layoutSettings.setColumnStretch(2, 1)
       self.layoutSettings.setAlignment(Qt.AlignTop)
       self.tabSettings.setLayout(self.layoutSettings)
       self.tabs.addTab(self.tabSettings, "&Settings")
@@ -209,6 +239,33 @@ class App(QMainWindow):
          return None
 
 
+   ####################################
+   #          Number of words         #
+   ####################################
+
+   def _minimumWordsChanged(self, value, *args, **kwargs):
+      '''Actions taken when the minimum number of words changed.'''
+
+      if value == 1:
+         self.minwordSpin.setSuffix(' word')
+      else:
+         self.minwordSpin.setSuffix(' words')
+
+      self.maxwordSpin.setMinimum(value)
+      return
+
+
+   def _maximumWordsChanged(self, value, *args, **kwargs):
+      '''Actions taken when the maximum number of words changed.'''
+
+      if value == 1:
+         self.maxwordSpin.setSuffix(' word')
+      else:
+         self.maxwordSpin.setSuffix(' words')
+      self.minwordSpin.setMaximum(value)
+      return
+
+
    ############################################
    #          Widgets related actions         #
    ############################################
@@ -216,6 +273,8 @@ class App(QMainWindow):
    def _changeCorpusEntry(self, name, *args, **kwargs):
       '''
       Change the corpus entry widget value.
+
+      :param str name: corpus name
       '''
 
       self.inputEntry.setText(name)
