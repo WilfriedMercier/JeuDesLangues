@@ -7,7 +7,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 import os
 import os.path         as     opath
 
-from   PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox
+from   PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox
 from   PyQt5.QtCore    import Qt, pyqtSlot
 from   PyQt5.QtGui     import QKeySequence, QPalette, QColor
 
@@ -20,7 +20,7 @@ class App(QMainWindow):
    def __init__(self, root, iconsPath='icons', *args, **kwargs):
       '''Initialise the application.'''
 
-      self.root       = root
+      self.root           = root
       super().__init__()
 
       ###############################
@@ -28,20 +28,20 @@ class App(QMainWindow):
       ###############################
 
       # Script current dir
-      self.scriptDir  = opath.dirname(opath.realpath(__file__))
-
-      conf, ok, msg   = bkd.setup(self.scriptDir, 'configuration.yaml')
+      self.rules          = {}
+      self.scriptDir      = opath.dirname(opath.realpath(__file__))
+      conf, ok, msg       = bkd.setup(self.scriptDir, 'configuration.yaml')
 
       if not ok:
          raise IOError(msg)
 
       # Corpus
-      self.corpusDir  = conf['corpusDir']
-      self.corpusName = conf['corpusName']
-      self.corpusText = conf['corpusText']
+      self.corpusDir      = conf['corpusDir']
+      self.corpusName     = conf['corpusName']
+      self.corpusText     = conf['corpusText']
 
       # Icons
-      self.icons      = conf['icons']
+      self.icons          = conf['icons']
 
       # Window
       self.win            = QWidget()
@@ -57,17 +57,16 @@ class App(QMainWindow):
       self.tabSettings    = QWidget()
       self.layoutSettings = QGridLayout()
 
-
       ############################################
       #           Common color palettes          #
       ############################################
 
-      self.okPalette    = QPalette()
-      green             = QColor('darkgreen')
+      self.okPalette      = QPalette()
+      green               = QColor('darkgreen')
       self.okPalette.setColor(QPalette.Text, green)
 
-      self.errorPalette = QPalette()
-      red             = QColor('firebrick')
+      self.errorPalette   = QPalette()
+      red                 = QColor('firebrick')
       self.errorPalette.setColor(QPalette.Text, red)
 
       #############################################
@@ -75,7 +74,7 @@ class App(QMainWindow):
       #############################################
 
       # Top line input text
-      self.inputText  = QLabel('Corpus file')
+      self.inputText      = QLabel('Corpus file')
       self.inputText.setAlignment(Qt.AlignTop)
 
       # Top line input entry
@@ -98,6 +97,7 @@ class App(QMainWindow):
 
       # Second line minimum words spinbox
       self.minwordSpin = QSpinBox()
+      self.minwordSpin.setToolTip('Sentences will be drawn from a corpus file with a number of words between the minimum and maximum allowed. The more words, the harder it gets.')
       self.minwordSpin.setSuffix(' words')
       self.minwordSpin.setValue(3)
       self.minwordSpin.setMinimum(1)
@@ -105,15 +105,37 @@ class App(QMainWindow):
       self.minwordSpin.valueChanged.connect(self._minimumWordsChanged)
 
       # Second line maximum words text
-      self.maxwordText = QLabel('Maximum number of words')
+      self.maxwordText   = QLabel('Maximum number of words')
       self.maxwordText.setAlignment(Qt.AlignTop)
 
       # Second line maximum words spinbox
-      self.maxwordSpin = QSpinBox()
+      self.maxwordSpin   = QSpinBox()
+      self.maxwordSpin.setToolTip('Sentences will be drawn from a corpus file with a number of words between the minimum and maximum allowed. The more words, the harder it gets.')
       self.maxwordSpin.setSuffix(' words')
       self.maxwordSpin.setValue(10)
       self.maxwordSpin.setMinimum(3)
       self.maxwordSpin.valueChanged.connect(self._maximumWordsChanged)
+
+      # Third line group box
+      self.rulesBox      = QGroupBox('Rules')
+      self.layoutRules   = QGridLayout()
+
+      self.rulesNbGrSpin = QSpinBox()
+      self.rulesNbGrSpin.setToolTip('Each player represents a language which will evolve on its own with each new turn')
+      self.rulesNbGrSpin.valueChanged.connect(lambda value: self.setRule(nbPlayers = value))
+      self.rulesNbGrSpin.setValue(5)
+      self.rulesNbGrSpin.setMinimum(1)
+      self.rulesNbGrText = QLabel('Number of players')
+
+      self.rulesTurnSpin = QSpinBox()
+      self.rulesTurnSpin.setToolTip('Players will alter their sentence each turn to simulate the evolution of languages')
+      self.rulesTurnSpin.valueChanged.connect(lambda value: self.setRule(nbTurns = value))
+      self.rulesTurnSpin.setValue(6)
+      self.rulesTurnSpin.setMinimum(1)
+      self.rulesTurnText = QLabel('Number of turns')
+
+      self.rulesVow_Vow  = QCheckBox('Vowel to vowel shift')
+      self.rulesVow_Vow.setToolTip('A vowel will be randomly selected and replaced by another one')
 
       ################################################
       #                 Setup layout                 #
@@ -124,7 +146,7 @@ class App(QMainWindow):
       self.tabMain.setLayout(self.layoutMain)
       self.tabs.addTab(self.tabMain, "&Game")
 
-      # Settings tab widgets layout
+      # Setting tab widgets layout
       self.layoutSettings.addWidget(self.inputText,   1, 1)
       self.layoutSettings.addWidget(self.inputEntry,  2, 1, 1, 2)
       self.layoutSettings.addWidget(self.inputButton, 2, 3)
@@ -135,6 +157,22 @@ class App(QMainWindow):
       self.layoutSettings.addWidget(self.maxwordText, 3, 2)
       self.layoutSettings.addWidget(self.maxwordSpin, 4, 2)
 
+      self.layoutSettings.addWidget(self.rulesBox,    5, 1, 1, 3)
+
+      # Setting rules box widgets layout
+      self.layoutRules.addWidget(self.rulesNbGrSpin,  1, 1)
+      self.layoutRules.addWidget(self.rulesNbGrText,  1, 2)
+
+      self.layoutRules.addWidget(self.rulesTurnSpin,  2, 1)
+      self.layoutRules.addWidget(self.rulesTurnText,  2, 2)
+
+      # Setting rules box layout
+      self.layoutRules.setAlignment(Qt.AlignTop)
+      self.layoutRules.setColumnStretch(1, 1)
+      self.layoutRules.setColumnStretch(2, 12)
+      self.rulesBox.setLayout(self.layoutRules)
+
+      # Setting tab layout
       self.layoutSettings.setColumnStretch(1, 1)
       self.layoutSettings.setColumnStretch(2, 1)
       self.layoutSettings.setAlignment(Qt.AlignTop)
@@ -312,6 +350,19 @@ class App(QMainWindow):
          return True
       else:
          return False
+
+   def setRule(self, *args, **kwargs):
+      '''
+      Set a rule with the given value. Function should be called as follows
+
+      ... self.setRule(someRule = someValue)
+      '''
+
+      for item, value in kwargs.items():
+         self.rules[item] = value
+
+      return
+
 
 if __name__ == '__main__':
    root   = QApplication(sys.argv)
