@@ -134,8 +134,41 @@ class App(QMainWindow):
       self.rulesTurnSpin.setMinimum(1)
       self.rulesTurnText = QLabel('Number of turns')
 
-      self.rulesVow_Vow  = QCheckBox('Vowel to vowel shift')
-      self.rulesVow_Vow.setToolTip('A vowel will be randomly selected and replaced by another one')
+      self.rulesVow_Vow_S = QCheckBox('Single word vowel to vowel shift')
+      self.rulesVow_Vow_S.setToolTip('A vowel will be randomly selected and replaced by another one in a single word')
+      self.rulesVow_Vow_S.stateChanged.connect(lambda value: self.setRule(Vow_Vow_S = value == 2))
+      self.rulesVow_Vow_S.setChecked(True)
+
+      self.rulesVow_Vow_A = QCheckBox('All words vowel to vowel shift')
+      self.rulesVow_Vow_A.setToolTip('A vowel will be randomly selected and replaced by another one in every word containing that vowel')
+      self.rulesVow_Vow_A.stateChanged.connect(lambda value: self.setRule(Vow_Vow_A = value == 2))
+      self.rulesVow_Vow_A.setChecked(True)
+
+      self.rulesCon_Con_S  = QCheckBox('Single word consonant to consonant shift')
+      self.rulesCon_Con_S.setToolTip('A consonant will be randomly selected and replaced by another one in a single word')
+      self.rulesCon_Con_S.stateChanged.connect(lambda value: self.setRule(Con_Con_S = value == 2))
+      self.rulesCon_Con_S.setChecked(True)
+
+      self.rulesCon_Con_A  = QCheckBox('All words consonant to consonant shift')
+      self.rulesCon_Con_A.setToolTip('A consonant will be randomly selected and replaced by another one in every word containing that consonant')
+      self.rulesCon_Con_A.stateChanged.connect(lambda value: self.setRule(Con_Con_A = value == 2))
+      self.rulesCon_Con_A.setChecked(True)
+
+      self.rulesLet_Let_S  = QCheckBox('Single word letter to letter shift')
+      self.rulesLet_Let_S.setToolTip('A letter will be randomly selected and replaced by another one in a single word')
+      self.rulesLet_Let_S.stateChanged.connect(lambda value: self.setRule(Let_Let_S = value == 2))
+      self.rulesLet_Let_S.setChecked(True)
+
+      self.rulesLet_Let_A  = QCheckBox('All words letter to letter shift')
+      self.rulesLet_Let_A.setToolTip('A letter will be randomly selected and replaced by another one in every word containing that lettter')
+      self.rulesLet_Let_A.stateChanged.connect(lambda value: self.setRule(Let_Let_A = value == 2))
+      self.rulesLet_Let_A.setChecked(True)
+
+      self.rulesDel        = QCheckBox('Letter deletion')
+      self.rulesDel.setToolTip('A letter will be randomly selected and removed from a single word')
+      self.rulesDel.stateChanged.connect(lambda value: self.setRule(Delete = value == 2))
+      self.rulesDel.setChecked(True)
+
 
       ################################################
       #                 Setup layout                 #
@@ -165,6 +198,17 @@ class App(QMainWindow):
 
       self.layoutRules.addWidget(self.rulesTurnSpin,  2, 1)
       self.layoutRules.addWidget(self.rulesTurnText,  2, 2)
+
+      self.layoutRules.addWidget(self.rulesVow_Vow_S, 3, 1, 1, 2)
+      self.layoutRules.addWidget(self.rulesVow_Vow_A, 4, 1, 1, 2)
+
+      self.layoutRules.addWidget(self.rulesCon_Con_S, 5, 1, 1, 2)
+      self.layoutRules.addWidget(self.rulesCon_Con_A, 6, 1, 1, 2)
+
+      self.layoutRules.addWidget(self.rulesLet_Let_S, 7, 1, 1, 2)
+      self.layoutRules.addWidget(self.rulesLet_Let_A, 8, 1, 1, 2)
+
+      self.layoutRules.addWidget(self.rulesDel,       9, 1, 1, 2)
 
       # Setting rules box layout
       self.layoutRules.setAlignment(Qt.AlignTop)
@@ -361,6 +405,7 @@ class App(QMainWindow):
       for item, value in kwargs.items():
          self.rules[item] = value
 
+      print(self.rules)
       return
 
 
