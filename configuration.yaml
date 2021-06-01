@@ -1,6 +1,6 @@
 iconDir: 'icons'
 corpusDir: 'corpus'
-corpusDefault: 'corpus_balzac.txt'
+corpus: 'corpus_balzac.txt'
 formats:
 - 'xbm'
 - 'xpm'
@@ -12,3 +12,8 @@ formats:
 - 'pbm'
 - 'pgm'
 - 'ppm'
+languageDir: 
+- 'backend'
+- 'languages'
+language: 'French.yaml'
+languageAlterations: True

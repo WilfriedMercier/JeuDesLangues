@@ -37,11 +37,14 @@ class App(QMainWindow):
 
       # Corpus
       self.corpusDir      = conf['corpusDir']
-      self.corpusName     = conf['corpusName']
+      self.corpusName     = conf['corpus']
       self.corpusText     = conf['corpusText']
 
       # Icons
       self.icons          = conf['icons']
+
+      # Language properties
+      self.language       = {'vowels' : conf['vowels'], 'consonants' : conf['consonants']}
 
       # Window
       self.win            = QWidget()
