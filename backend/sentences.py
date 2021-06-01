@@ -2,9 +2,9 @@ import nltk
 import random
 
 
-##################################################
-#         Extracting words and sentences         #
-##################################################
+#################################################################################
+#         Extracting sentences, words, consonants, vowels and syllables         #
+#################################################################################
 
 def make_sentences(files):
    '''
@@ -49,6 +49,39 @@ def make_words(sentence, exclude=[',', '.', ';', ':', '!', '?', '--', '(', ')'])
 
    return words
 
+def make_vowels_consonants(sentence, language):
+   '''
+   Extract all the vowels and consonants in a given sentence.
+
+   :param str sentence: sentence to extract vowels and consonants from
+   :param dict language: dictionary defining the alphabet of the language used to extract vowels and consonants from the sentence
+
+   :returns: list of vowels, list of consonants
+   :rtype: list[str], list[str]
+   '''
+
+   # If alternations are considered, then they are similar to the characters they map to, in which case they do not appear in the vowel or consonant lists but must be mapped
+   # If alternations are not considered, alteradted characters are different and therefore do appear in the vowel and consonant lists
+   alternations = language['map_alternate']
+
+   consonants   = []
+   vowels       = []
+
+   for char in sentence:
+
+      if char in language['consonants'] and char not in consonants:
+         consonants.append(char)
+      elif char in language['vowels'] and char not in vowels:
+         vowels.append(char)
+      else:
+         # If character is neither a vowel or a consonant, it can be an alternated character
+         if char in alternations.keys():
+            if alternations[char] in language['vowels'] and alternations[char] not in vowels:
+               vowels.append(alternations[char])
+            elif alternations[char] in language['consonants'] and alternations[char] not in consonants:
+               consonants.append(alternations[char])
+
+   return vowels, consonants
 
 def pick_sentence(sentences, minWords=1, maxWords=14, maxPass=100):
    '''
@@ -99,19 +132,5 @@ def pick_sentence(sentences, minWords=1, maxWords=14, maxPass=100):
 # nltk.tokenize.legality_principle module to split into syllables
 
 def VowtoVow_All(sentence):
-   
-
-
-
-
-
-
-
-# Split text into sentences
-files                   = ['../corpus/corpus_balzac.txt']
-sentences               = make_sentences(files)
-sentence, words, lwords = pick_sentence(sentences, minWords=3, maxWords=10, maxPass=100)
-
-print(sentence)
-print(lwords, words)
+   return
 
