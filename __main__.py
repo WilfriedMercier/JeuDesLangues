@@ -169,6 +169,11 @@ class App(QMainWindow):
       self.rulesDel.stateChanged.connect(lambda value: self.setRule(Delete = value == 2))
       self.rulesDel.setChecked(True)
 
+      self.rulesSwap       = QCheckBox('Swap two words')
+      self.rulesSwap.setToolTip('Two consecutive words will be randomly selected and interchanged in the sentence')
+      self.rulesSwap.stateChanged.connect(lambda value: self.setRule(Swap = value == 2))
+      self.rulesSwap.setChecked(True)
+
 
       ################################################
       #                 Setup layout                 #
@@ -193,22 +198,24 @@ class App(QMainWindow):
       self.layoutSettings.addWidget(self.rulesBox,    5, 1, 1, 3)
 
       # Setting rules box widgets layout
-      self.layoutRules.addWidget(self.rulesNbGrSpin,  1, 1)
-      self.layoutRules.addWidget(self.rulesNbGrText,  1, 2)
+      self.layoutRules.addWidget(self.rulesNbGrSpin,  1,  1)
+      self.layoutRules.addWidget(self.rulesNbGrText,  1,  2)
 
-      self.layoutRules.addWidget(self.rulesTurnSpin,  2, 1)
-      self.layoutRules.addWidget(self.rulesTurnText,  2, 2)
+      self.layoutRules.addWidget(self.rulesTurnSpin,  2,  1)
+      self.layoutRules.addWidget(self.rulesTurnText,  2,  2)
 
-      self.layoutRules.addWidget(self.rulesVow_Vow_S, 3, 1, 1, 2)
-      self.layoutRules.addWidget(self.rulesVow_Vow_A, 4, 1, 1, 2)
+      self.layoutRules.addWidget(self.rulesVow_Vow_S, 3,  1, 1, 2)
+      self.layoutRules.addWidget(self.rulesVow_Vow_A, 4,  1, 1, 2)
 
-      self.layoutRules.addWidget(self.rulesCon_Con_S, 5, 1, 1, 2)
-      self.layoutRules.addWidget(self.rulesCon_Con_A, 6, 1, 1, 2)
+      self.layoutRules.addWidget(self.rulesCon_Con_S, 5,  1, 1, 2)
+      self.layoutRules.addWidget(self.rulesCon_Con_A, 6,  1, 1, 2)
 
-      self.layoutRules.addWidget(self.rulesLet_Let_S, 7, 1, 1, 2)
-      self.layoutRules.addWidget(self.rulesLet_Let_A, 8, 1, 1, 2)
+      self.layoutRules.addWidget(self.rulesLet_Let_S, 7,  1, 1, 2)
+      self.layoutRules.addWidget(self.rulesLet_Let_A, 8,  1, 1, 2)
 
-      self.layoutRules.addWidget(self.rulesDel,       9, 1, 1, 2)
+      self.layoutRules.addWidget(self.rulesDel,       9,  1, 1, 2)
+
+      self.layoutRules.addWidget(self.rulesSwap,      10, 1, 1, 2)
 
       # Setting rules box layout
       self.layoutRules.setAlignment(Qt.AlignTop)
