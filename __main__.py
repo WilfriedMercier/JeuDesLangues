@@ -38,13 +38,30 @@ class App(QMainWindow):
       # Corpus
       self.corpusDir      = conf['corpusDir']
       self.corpusName     = conf['corpus']
-      self.corpusText     = conf['corpusText']
+      self.corpusText     = bkd.make_sentences(conf['corpusText'])
 
       # Icons
       self.icons          = conf['icons']
 
       # Language properties
-      self.language       = {'vowels' : conf['vowels'], 'consonants' : conf['consonants']}
+      self.language       = {'vowels' : conf['vowels'], 'consonants' : conf['consonants'], 'map_alternate' : conf['map_alternate'], 'map_alternate_inv' : conf['map_alternate_inv']}
+
+      ###################################
+      #         Testing section         #
+      ###################################
+
+      # Split text into sentences
+      sentence, words, lwords = bkd.pick_sentence(self.corpusText, minWords=3, maxWords=10, maxPass=100)
+      print(lwords, words)
+
+      vowels, consonants = bkd.make_vowels_consonants(sentence.lower(), self.language)
+      print(vowels)
+      print(consonants)
+
+      sentence, vowels, vout, vin = bkd.VowtoVow_All(sentence, self.language, vowels=vowels)
+      print(sentence)
+      print(vout, vin)
+      print(vowels)
 
       # Window
       self.win            = QWidget()
@@ -415,7 +432,6 @@ class App(QMainWindow):
       for item, value in kwargs.items():
          self.rules[item] = value
 
-      print(self.rules)
       return
 
 
