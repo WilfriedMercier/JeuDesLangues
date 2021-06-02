@@ -16,4 +16,4 @@ languageDir:
 - 'backend'
 - 'languages'
 language: 'French.yaml'
-languageAlterations: True
+languageAlterations: False
