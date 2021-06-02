@@ -7,6 +7,9 @@ from   functools   import reduce
 from   glob        import glob
 from   PyQt5.QtGui import QIcon, QPixmap
 
+# Custom imports
+from  .sentences   import *
+
 def loadCorpus(scriptPath, corpusPath, corpusFile):
    '''
    Load a corpus file.
@@ -86,6 +89,7 @@ def loadLanguage(scriptPath, languagePath, languageFile, alt=True):
       # If we consider alternations, alternated forms must not appear in the vowel and consonant lists, but we must keep track by mapping them to their parent form
       if alt:
          conf['map_alternate']     = {}
+         conf['map_alternate_inv'] = conf['alterations']
 
          for letter, alterations in conf['alterations'].items():
             for alteration in alterations:
@@ -94,6 +98,7 @@ def loadLanguage(scriptPath, languagePath, languageFile, alt=True):
       # If we do not consider alternations, then alternated forms are considered as different characters and must be included into the vowel and consonant lists
       else:
          conf['map_alternate']     = {}
+         conf['map_alternate_inv'] = {}
 
          for letter, alterations in conf['alterations'].items():
             if letter in conf['consonants']:
@@ -167,9 +172,9 @@ def setup(scriptPath, configFile):
          return {}, ok, msg
 
       # Add vowels and consonants into the conf dict
-      conf['vowels']        = language['vowels']
-      conf['consonants']    = language['consonants']
-      conf['map_alternate'] = language['map_alternate']
+      conf['vowels']            = language['vowels']
+      conf['consonants']        = language['consonants']
+      conf['map_alternate']     = language['map_alternate']
+      conf['map_alternate_inv'] = language['map_alternate_inv']
 
       return conf, ok, msg
-

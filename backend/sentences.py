@@ -6,24 +6,22 @@ import random
 #         Extracting sentences, words, consonants, vowels and syllables         #
 #################################################################################
 
-def make_sentences(files):
+def make_sentences(texts):
    '''
-   Extract sentences out of a corpus of text files.
+   Extract sentences out of a corpus of texts.
 
-   :param files: file or list of files from which the sentences are extracted
-   :type files: str or list[str]
+   :param texts: text or list of texts from which the sentences are extracted
+   :type texts: str or list[str]
 
    :returns: list of sentences
    :rtype: list[str]
    '''
 
-   if isinstance(files, str):
-      files = [files]
+   if isinstance(texts, str):
+      texts         = [texts]
 
    sentences        = []
-   for file in files:
-      with open(file, 'r') as f:
-         text       = f.read()
+   for text in texts:
          text       = text.replace('-\n', '')
          text       = text.replace('\n', ' ')
          stcs       = nltk.sent_tokenize(text)
@@ -32,9 +30,9 @@ def make_sentences(files):
    return sentences
 
 
-def make_words(sentence, exclude=[',', '.', ';', ':', '!', '?', '--', '(', ')']):
+def make_words(sentence, exclude=[',', '.', ';', ':', '!', '?', '--', '(', ')', '"', '»', '«']):
    '''
-   Extract words from sentences, removing the following characters: ,;.:!--?
+   Extract words from sentences, removing some characters.
 
    :param str sentence: sentence to extract words from
 
@@ -131,6 +129,43 @@ def pick_sentence(sentences, minWords=1, maxWords=14, maxPass=100):
 
 # nltk.tokenize.legality_principle module to split into syllables
 
-def VowtoVow_All(sentence):
-   return
+def VowtoVow_All(sentence, language, vowels=None):
+   '''
+   Randomly modify a vowel into another one in all the occurences in the sentence.
+
+   :param str sentence: sentence to modify the vowel from
+   :param dict language: dictionary describing the lnaguage used
+
+   :param list vowels: list of vowels appearing in the sentence
+
+   :returns: modified sentence, new vowels list, vowel removed, vowel added
+   :rtype: str, list[str], str, str
+   '''
+
+   if vowels is None:
+      raise ValueError('A vowels list must be given.')
+
+   # Pick a vowel in the sentence
+   vowel_out         = random.choice(vowels)
+
+   # Pick a vowel to put in the sentence
+   vowel_in          = random.choice(language['vowels'])
+
+   # Replace the vowel
+   sentence          = sentence.replace(vowel_out, vowel_in)
+
+   vowels.remove(vowel_out)
+   if vowel_in not in vowels:
+      vowels.append(vowel_in)
+
+   # Take care of alterations
+   if vowel_out in language['map_alternate_inv']:
+      for alternation in language['map_alternate_inv'][vowel_out]:
+
+         if alternation in sentence:
+            sentence = sentence.replace(alternation, vowel_in)
+
+            sentence.remove(alternation)
+
+   return sentence, vowels, vowel_out, vowel_in
 
