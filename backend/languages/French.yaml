@@ -28,7 +28,7 @@ consonants:
 - v
 - b
 - n
-accents:
+alterations:
   a:
   - à
   - â
@@ -50,7 +50,3 @@ accents:
   - ÿ
   c:
   - ç
-  
-
-   
-
