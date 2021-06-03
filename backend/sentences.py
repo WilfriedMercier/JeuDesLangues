@@ -36,14 +36,16 @@ def make_words(sentence, exclude=[',', '.', ';', ':', '!', '?', '--', '(', ')', 
 
    :param str sentence: sentence to extract words from
 
-   :param list[str] exclude: (**Optional**) characters to not consider as words and to exclude from the words list
+   :param list[str] exclude: (**Optional**) characters to not consider as words and to exclude from the words list. If None, these characters are not removed.
 
    :returns: list of words
    :rtype: list[str]
    '''
 
    words = nltk.word_tokenize(sentence)
-   words = [i for i in words if i not in exclude]
+
+   if exclude is not None:
+      words = [i for i in words if i not in exclude]
 
    return words
 
@@ -158,14 +160,76 @@ def VowtoVow_All(sentence, language, vowels=None):
    if vowel_in not in vowels:
       vowels.append(vowel_in)
 
-   # Take care of alterations
+   # Take care of alternations
    if vowel_out in language['map_alternate_inv']:
       for alternation in language['map_alternate_inv'][vowel_out]:
 
          if alternation in sentence:
             sentence = sentence.replace(alternation, vowel_in)
 
-            sentence.remove(alternation)
-
    return sentence, vowels, vowel_out, vowel_in
+
+def VowtoVow_Single(sentence, language):
+   '''
+   Randomly modify a vowel into another one in a randomly chosen word.
+
+   :param str sentence: sentence to modify the vowel from
+   :param dict language: dictionary describing the lnaguage used
+
+   :returns: modified sentence, picked word, new vowels list, vowel removed, vowel added
+   :rtype: str, str, list[str], str, str
+   '''
+
+   ##################################
+   #         Random choices         #
+   ##################################
+
+   # Pick a random word
+   words              = make_words(sentence)
+   word               = random.choice(words)
+
+   # Extract vowels and consonants
+   vowels, consonants = make_vowels_consonants(word, language)
+
+   # Pick a vowel in the sentence
+   vowel_out          = random.choice(vowels)
+
+   # Pick a vowel to put in the sentence
+   vowel_in           = random.choice(language['vowels'])
+
+
+   ############################
+   #      Split sentence      #
+   ############################
+
+   # Split the sentence excluding some characters
+   sentence_split     = make_words(sentence)
+
+   # Split the sentence keeping characters such as , in words
+   sentence_rec       = sentence.split(' ')
+
+
+   ###########################################
+   #            Replace the vowel            #
+   ###########################################
+
+   for pos in range(len(sentence_split)):
+      if sentence_split[pos].lower() == word.lower():
+         sentence_rec[pos]          = sentence_rec[pos].replace(vowel_out, vowel_in)
+
+         # Take care of alternations
+         if vowel_out in language['map_alternate_inv']:
+            for alternation in language['map_alternate_inv'][vowel_out]:
+               if alternation in word:
+                  sentence_rec[pos] = sentence_rec[pos].replace(alternation, vowel_in)
+
+   # Remove the previous vowel from the vowel list and add the new one if necessary
+   vowels.remove(vowel_out)
+   if vowel_in not in vowels:
+      vowels.append(vowel_in)
+
+   # Reconstruct the sentence
+   sentence = ' '.join(sentence_rec)
+
+   return sentence, word, vowels, vowel_out, vowel_in
 
