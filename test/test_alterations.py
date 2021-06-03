@@ -54,21 +54,34 @@ def loadLanguage(scriptPath, languagePath, languageFile, alt=True):
    return conf, ok, msg
 
 # Single sentence corpus as test example
-corpus = "Le voile noir de la nuit s'entancha d'une étrange lueur rougeâtre."
+corpus = "Nous fûmes entourées d'une étrange lueur rougeâtre, et à la vielle du départ, nous partîmes."
 
-# Generate language dict
+# Generate language dict:
+#   - alt = True consider that alternations (e.g. à for a) are similar as their parent form
+#   - alt = False consider that alternations are different vowels or consonants
+
 language, ok, msg = loadLanguage('../', 'backend/languages', 'French.yaml', alt=True)
 
-# Split text into sentences
+#print('Language:\n', language)
+
+# Show word separation
 sentence, words, lwords = st.pick_sentence([corpus], minWords=3, maxWords=100, maxPass=100)
 print('Sentence  :', sentence)
 print('Split     :', lwords, words)
 
+# Show vowels and consonants separation
 vowels, consonants = st.make_vowels_consonants(sentence.lower(), language)
-print('Vowels    :',     vowels)
+print('Vowels    :', vowels)
 print('Consonants:', consonants)
 
+# Show vowel to vowel random modification in all words
 sentence, vowels, vout, vin = st.VowtoVow_All(sentence, language, vowels=vowels)
 print(vout, '->',  vin)
 print('Sentence  :', sentence)
-print('Vowels    :',    vowels)
+print('Vowels    :', vowels)
+
+# Show vowel to vowel random modification in all words
+sentence, word, vowels, vout, vin = st.VowtoVow_Single(sentence, language)
+print(word, vout, '->',  vin)
+print('Sentence  :', sentence)
+print('Vowels    :', vowels)
