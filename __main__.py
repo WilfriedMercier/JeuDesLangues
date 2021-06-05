@@ -5,14 +5,15 @@ import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 import os
-import os.path         as     opath
+import os.path           as     opath
 
-from   PyQt5.QtWidgets import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox
-from   PyQt5.QtCore    import Qt, pyqtSlot
-from   PyQt5.QtGui     import QKeySequence, QPalette, QColor
+from   PyQt5.QtWidgets   import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox
+from   PyQt5.QtCore      import Qt, pyqtSlot
+from   PyQt5.QtGui       import QKeySequence, QPalette, QColor
 
 # Custom backend functions
-import backend         as     bkd
+import backend           as     bkd
+import backend.sentences as snt
 
 class App(QMainWindow):
    '''Main application.'''
@@ -46,6 +47,10 @@ class App(QMainWindow):
       # Language properties
       self.language       = {'vowels' : conf['vowels'], 'consonants' : conf['consonants'], 'map_alternate' : conf['map_alternate'], 'map_alternate_inv' : conf['map_alternate_inv']}
 
+      # Sentence to be modified by the game
+      self.sentence       = ''
+      self.words          = []
+
       # Window
       self.win            = QWidget()
       self.win.setWindowTitle('Jeu des langues (EBTP)')
@@ -72,9 +77,89 @@ class App(QMainWindow):
       red                 = QColor('firebrick')
       self.errorPalette.setColor(QPalette.Text, red)
 
-      #############################################
-      #              Settings widgets             #
-      #############################################
+
+      ################################################
+      #                 Setup layout                 #
+      ################################################
+
+      # Main tab widgets layout
+      self.layoutMain.setAlignment(Qt.AlignTop)
+      self.tabMain.setLayout(self.layoutMain)
+      self.tabs.addTab(self.tabMain, "&Game")
+
+      # Game layout
+      self._makeLayoutGame()
+
+      # Settings layout
+      self._makeLayoutSettings()
+
+      # Main window layout
+      self.layoutWin.addWidget(self.tabs, 1, 1)
+      self.win.setLayout(self.layoutWin)
+
+      ###############################################
+      #               Setup shortcuts               #
+      ###############################################
+
+      self.shortcuts           = {}
+      self.shortcuts['Ctrl+O'] = QShortcut(QKeySequence('Ctrl+O'), self.win)
+      self.shortcuts['Ctrl+O'].activated.connect(self.loadCorpus)
+
+      # Show application
+      self.win.resize(800, 800)
+      self.win.show()
+      self.centre()
+
+
+   ####################################
+   #          Layout methods          #
+   ####################################
+
+   def _makeLayoutGame(self, *args, **kwargs):
+      '''Make the layout for the game tab.'''
+
+      #####################
+      #      Widgets      #
+      #####################
+
+      # Generate sentence button
+      self.genSenButton    = QPushButton('New sentence')
+#      self.genSenButton.setFlat(True)
+      self.genSenButton.setToolTip('Click to randomly draw a new setence form the corpus')
+      self.genSenButton.clicked.connect(self.newSentence)
+
+      # Sentence label
+      self.senBox          = QGroupBox('Selected sentence')
+      self.layoutSenbox    = QGridLayout()
+
+      self.senLabel        = QLabel('')
+      self.senLabel.setToolTip('')
+
+
+      #################################
+      #             Layout            #
+      #################################
+
+      # Generate sentence button
+      self.layoutMain.addWidget(self.genSenButton,   1, 1)
+      self.layoutMain.addWidget(self.senBox,         1, 2)
+
+      # Sentence box widgets
+      self.layoutSenbox.addWidget(self.senLabel,     1, 1)
+      self.senBox.setLayout(self.layoutSenbox)
+
+      # Column stretch
+      self.layoutMain.setColumnStretch(1, 1)
+      self.layoutMain.setColumnStretch(2, 6)
+
+      return
+
+   def _makeLayoutSettings(self, *args, **kwargs):
+      '''Make the layout for the settings tab.'''
+
+      #####################
+      #      Widgets      #
+      #####################
 
       # Top line input text
       self.inputText      = QLabel('Corpus file')
@@ -178,14 +263,9 @@ class App(QMainWindow):
       self.rulesSwap.setChecked(True)
 
 
-      ################################################
-      #                 Setup layout                 #
-      ################################################
-
-      # Main tab widgets layout
-      self.layoutMain.setAlignment(Qt.AlignTop)
-      self.tabMain.setLayout(self.layoutMain)
-      self.tabs.addTab(self.tabMain, "&Game")
+      #################################
+      #             Layout            #
+      #################################
 
       # Setting tab widgets layout
       self.layoutSettings.addWidget(self.inputText,   1, 1)
@@ -233,22 +313,19 @@ class App(QMainWindow):
       self.tabSettings.setLayout(self.layoutSettings)
       self.tabs.addTab(self.tabSettings, "&Settings")
 
-      # Main window layout
-      self.layoutWin.addWidget(self.tabs, 1, 1)
-      self.win.setLayout(self.layoutWin)
+      return
 
-      ###############################################
-      #               Setup shortcuts               #
-      ###############################################
 
-      self.shortcuts           = {}
-      self.shortcuts['Ctrl+O'] = QShortcut(QKeySequence('Ctrl+O'), self.win)
-      self.shortcuts['Ctrl+O'].activated.connect(self.loadCorpus)
+   ############################################
+   #           Game related methods           #
+   ############################################
 
-      # Show application
-      self.win.resize(800, 800)
-      self.win.show()
-      self.centre()
+   def newSentence(self, *args, **kwargs):
+      '''Actions taken when the new sentence button is pressed.'''
+
+      self.sentence, self.words, nb = snt.pick_sentence(self.corpusText, self.minwordSpin.value(), self.maxwordSpin.value())
+      self.senLabel.setText('*' * len(self.sentence))
+      return
 
 
    #############################################
