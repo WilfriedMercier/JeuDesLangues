@@ -7,7 +7,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 import os
 import os.path           as     opath
 
-from   PyQt5.QtWidgets   import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView
+from   PyQt5.QtWidgets   import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView, QAbstractItemView
 from   PyQt5.QtCore      import Qt, pyqtSlot, QSize
 from   PyQt5.QtGui       import QKeySequence, QPalette, QColor, QStandardItemModel, QStandardItem
 
@@ -148,6 +148,8 @@ class App(QMainWindow):
       # Treeview with groups sentences
       self.treeview        = QTreeView( )
       self.model           = QStandardItemModel(0, 3)
+      self.treeview.setEditTriggers(QAbstractItemView.NoEditTriggers)
+      self.treeview.setSelectionMode(QAbstractItemView.NoSelection)
       self.model.setHorizontalHeaderLabels(['Group', 'Turn', 'Sentence'])
       self.treeview.setModel(self.model)
       
@@ -387,10 +389,14 @@ class App(QMainWindow):
        
        rootNode = self.model.invisibleRootItem()
        name     = QStandardItem('Test')
-       row      = QStandardItem('%d' %1)
+       name.setSelectable(False)
+       row      = QStandardItem('%d' %(self.model.rowCount()+1))
+       row.setSelectable(False)
        sentence = QStandardItem('This is a test')
+       sentence.setSelectable(False)
        item     = (name, row, sentence)
-       rootNode.appendRow(item)
+       
+       rootNode.appendRow(item) 
        
        return
    
