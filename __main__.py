@@ -7,9 +7,9 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 import os
 import os.path           as     opath
 
-from   PyQt5.QtWidgets   import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox
-from   PyQt5.QtCore      import Qt, pyqtSlot
-from   PyQt5.QtGui       import QKeySequence, QPalette, QColor
+from   PyQt5.QtWidgets   import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView
+from   PyQt5.QtCore      import Qt, pyqtSlot, QSize
+from   PyQt5.QtGui       import QKeySequence, QPalette, QColor, QStandardItemModel, QStandardItem
 
 # Custom backend functions
 import backend           as     bkd
@@ -123,9 +123,11 @@ class App(QMainWindow):
       #####################
 
       # Generate sentence button
-      self.genSenButton    = QPushButton('New sentence')
-#      self.genSenButton.setFlat(True)
-      self.genSenButton.setToolTip('Click to randomly draw a new setence form the corpus')
+      self.genSenButton    = QPushButton()
+      self.genSenButton.setFlat(True)
+      self.genSenButton.setIcon(self.icons['NEW'])
+      self.genSenButton.setIconSize(QSize(24, 24))
+      self.genSenButton.setToolTip('Click to randomly draw a new sentence form the corpus')
       self.genSenButton.clicked.connect(self.newSentence)
 
       # Sentence label
@@ -134,6 +136,33 @@ class App(QMainWindow):
 
       self.senLabel        = QLabel('')
       self.senLabel.setToolTip('')
+      
+      # Play button
+      self.playButton      = QPushButton('')
+      self.playButton.setFlat(True)
+      self.playButton.setIcon(self.icons['PLAY'])
+      self.playButton.setIconSize(QSize(24, 24))
+      self.playButton.setToolTip('Click to start the game')
+      self.playButton.clicked.connect(self.startGame)
+      
+      # Treeview with groups sentences
+      self.treeview        = QTreeView( )
+      self.model           = QStandardItemModel(0, 3)
+      self.model.setHorizontalHeaderLabels(['Group', 'Turn', 'Sentence'])
+      self.treeview.setModel(self.model)
+      
+      # User guess line
+      self.guessEntry      = QLineEdit('')
+      self.guessEntry.setAlignment(Qt.AlignTop)
+      self.guessEntry.setToolTip('Enter your guess for the mother sentence')
+      
+      # Validate button
+      self.validateButton  = QPushButton('')
+      self.validateButton.setFlat(True)
+      self.validateButton.setIcon(self.icons['VALIDATE'])
+      self.validateButton.setIconSize(QSize(24, 24))
+      self.validateButton.setToolTip('Click to validate your guess for the mother sentence')
+      self.validateButton.clicked.connect(self.validateGame)
 
 
       #################################
@@ -147,10 +176,25 @@ class App(QMainWindow):
       # Sentence box widgets
       self.layoutSenbox.addWidget(self.senLabel,     1, 1)
       self.senBox.setLayout(self.layoutSenbox)
+      
+      # Play button
+      self.layoutMain.addWidget(self.playButton,     1, 3)
+
+      # User guess line
+      self.layoutMain.addWidget(self.guessEntry,     2, 1, 1, 2)
+      
+      # Validate button
+      self.layoutMain.addWidget(self.validateButton, 2, 3)
+
+      # Treeview
+      self.layoutMain.addWidget(self.treeview,       3, 1, 1, 3)
 
       # Column stretch
       self.layoutMain.setColumnStretch(1, 1)
-      self.layoutMain.setColumnStretch(2, 6)
+      self.layoutMain.setColumnStretch(3, 1)
+      self.layoutMain.setColumnStretch(2, 10)
+      
+      
 
       return
 
@@ -323,9 +367,38 @@ class App(QMainWindow):
    def newSentence(self, *args, **kwargs):
       '''Actions taken when the new sentence button is pressed.'''
 
+      # Update sentence
       self.sentence, self.words, nb = snt.pick_sentence(self.corpusText, self.minwordSpin.value(), self.maxwordSpin.value())
       self.senLabel.setText('*' * len(self.sentence))
+      
+      # Update label
+      if nb <= 1:
+          word = 'word'
+      else:
+          word = 'words'
+          
+      self.senBox.setTitle('Selected sentence - %d %s' %(nb, word))
+      
       return
+  
+    
+   def startGame(self, *args, **kwargs):
+       '''Start the game.'''
+       
+       rootNode = self.model.invisibleRootItem()
+       name     = QStandardItem('Test')
+       row      = QStandardItem('%d' %1)
+       sentence = QStandardItem('This is a test')
+       item     = (name, row, sentence)
+       rootNode.appendRow(item)
+       
+       return
+   
+    
+   def validateGame(self, *args, **kwargs):
+       '''Actions taken when the validate button is hit.'''
+       
+       return
 
 
    #############################################
