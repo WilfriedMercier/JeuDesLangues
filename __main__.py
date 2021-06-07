@@ -389,11 +389,9 @@ class App(QMainWindow):
        
        rootNode = self.model.invisibleRootItem()
        name     = QStandardItem('Test')
-       name.setSelectable(False)
        row      = QStandardItem('%d' %(self.model.rowCount()+1))
-       row.setSelectable(False)
        sentence = QStandardItem('This is a test')
-       sentence.setSelectable(False)
+
        item     = (name, row, sentence)
        
        rootNode.appendRow(item) 

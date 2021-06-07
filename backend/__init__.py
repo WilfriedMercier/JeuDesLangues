@@ -8,7 +8,66 @@ from   glob        import glob
 from   PyQt5.QtGui import QIcon, QPixmap
 
 # Custom imports
-from  .sentences   import *
+import sentences   as     sen
+
+class LanguageGroup:
+    '''A class which combines all data relative to a language group.'''
+    
+    def __init__(self, sentence, language, vowels, consonants, *args, **kwargs):
+        '''
+        Init method for this class.
+        
+        :param str sentence: main sentence which is going to be modified
+        '''
+        
+        # Sentence relative to this group
+        self.sentence   = sentence
+        
+        # Vowels and consonants in the sentence
+        self.consonants = consonants
+        self.vowels     = vowels
+        
+        # Language dict
+        self.language   = language
+        
+        
+        
+    def applyRule(self, rule, *args, **kwargs):
+        ''''
+        Apply a given rule to the current sentence.
+        
+        :param str rule: rule to apply
+        '''
+        
+        # Output sentence
+        
+        return
+    
+    
+    ###################################
+    #              Rules              #
+    ###################################
+    
+    def VowtoVow_All(self, *args, **kwargs):
+        ''''Vowel to vowel on all words rule.'''
+        
+        # Transform sentence
+        out           = sen.VowtoVow_All(self.sentence, self.language, vowels=self.vowels)
+        sentence      = out[0]
+        vowels        = out[1]
+        vowel_out     = out[2] 
+        vowel_in      = out[3]
+        
+        # Update vowels
+        self.vowels   = vowels
+        
+        # Update sentence
+        self.sentence = sentence
+        
+        return
+        
+
+
 
 def loadCorpus(scriptPath, corpusPath, corpusFile):
    '''
@@ -127,18 +186,18 @@ def setup(scriptPath, configFile):
    :rtype: dict, bool, str
    '''
 
-   file                     = opath.join(scriptPath, configFile)
+   file                         = opath.join(scriptPath, configFile)
 
    if not opath.isfile(file):
       return {}, False, 'Configuration file is missing.'
    else:
       with open(file, 'r') as f:
-         conf               = yaml.load(f, Loader=yaml.Loader)
+         conf                   = yaml.load(f, Loader=yaml.Loader)
 
       # Generate icons
-      iconsPath             = conf['iconDir']
-      formats               = conf['formats']
-      icons, ok, msg        = loadIcons(scriptPath, iconsPath, formats=formats)
+      iconsPath                 = conf['iconDir']
+      formats                   = conf['formats']
+      icons, ok, msg            = loadIcons(scriptPath, iconsPath, formats=formats)
 
       if not ok:
          return {}, ok, msg
@@ -146,27 +205,27 @@ def setup(scriptPath, configFile):
       # Remove old icons keys and place loaded icons instead in conf dict
       conf.pop('iconDir')
       conf.pop('formats')
-      conf['icons']         = icons
+      conf['icons']             = icons
 
       # Load default corpus file if not empty
-      corpusPath            = conf['corpusDir']
-      corpusFile            = conf['corpus']
-      text, ok, msg         = loadCorpus(scriptPath, corpusPath, corpusFile)
+      corpusPath                = conf['corpusDir']
+      corpusFile                = conf['corpus']
+      text, ok, msg             = loadCorpus(scriptPath, corpusPath, corpusFile)
 
       if not ok:
          return {}, ok, msg
 
       # Place corpus text and full directory in conf dict
-      conf['corpusDir']     = opath.join(scriptPath, corpusPath)
-      conf['corpusText']    = text
+      conf['corpusDir']         = opath.join(scriptPath, corpusPath)
+      conf['corpusText']        = text
 
       # Build default language dict
-      languagePath          = reduce(lambda x,y: opath.join(x, y), conf['languageDir'])
-      languageFile          = conf['language']
+      languagePath              = reduce(lambda x,y: opath.join(x, y), conf['languageDir'])
+      languageFile              = conf['language']
 
-      alterations           = conf['languageAlterations']
+      alterations               = conf['languageAlterations']
 
-      language, ok, msg     = loadLanguage(scriptPath, languagePath, languageFile, alt=alterations)
+      language, ok, msg         = loadLanguage(scriptPath, languagePath, languageFile, alt=alterations)
 
       if not ok:
          return {}, ok, msg
