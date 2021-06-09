@@ -2,33 +2,45 @@
 # Mercier Wilfried - IRAP
 
 import yaml
-import os.path     as     opath
-from   functools   import reduce
-from   glob        import glob
-from   PyQt5.QtGui import QIcon, QPixmap
+import os.path           as     opath
+from   functools         import reduce
+from   glob              import glob
+from   PyQt5.QtGui       import QIcon, QPixmap
 
 # Custom imports
-import sentences   as     sen
+from   backend.sentences import VowtoVow_All, make_sentences
 
 class LanguageGroup:
     '''A class which combines all data relative to a language group.'''
     
-    def __init__(self, sentence, language, vowels, consonants, *args, **kwargs):
+    def __init__(self, sentence, language, vowels, consonants, idd=None, *args, **kwargs):
         '''
         Init method for this class.
         
+        :param list consonants: list of consonants
+        :param dict language: dictionary representing the considered language
         :param str sentence: main sentence which is going to be modified
+        :param list vowels: list of vowels
+        
+        :param str idd: (**Optional**) identifier for this language group
         '''
         
-        # Sentence relative to this group
-        self.sentence   = sentence
+        self.id          = idd
+        
+        # Keep track of sentences each turn in a dict
+        self.sentence    = {'0' : sentence}
         
         # Vowels and consonants in the sentence
-        self.consonants = consonants
-        self.vowels     = vowels
+        self.consonants  = consonants
+        self.vowels      = vowels
         
         # Language dict
-        self.language   = language
+        self.language    = language
+        
+        # Rule methods
+        self.ruleMethods = {'VowtoVow_All'    : self.VowtoVow,
+                            'VowtoVow_Single' : self.VowtoVow_Single
+                           }
         
         
         
@@ -39,7 +51,7 @@ class LanguageGroup:
         :param str rule: rule to apply
         '''
         
-        # Output sentence
+        
         
         return
     
@@ -48,24 +60,44 @@ class LanguageGroup:
     #              Rules              #
     ###################################
     
-    def VowtoVow_All(self, *args, **kwargs):
-        ''''Vowel to vowel on all words rule.'''
+    def VowtoVow_All(self, turn, *args, **kwargs):
+        ''''
+        Vowel to vowel on all words rule.
+        
+        :param str turn: name of the turn to put in the sentence dict
+        '''
         
         # Transform sentence
-        out           = sen.VowtoVow_All(self.sentence, self.language, vowels=self.vowels)
-        sentence      = out[0]
-        vowels        = out[1]
-        vowel_out     = out[2] 
-        vowel_in      = out[3]
+        out                 = sen.VowtoVow_All(self.sentence, self.language, vowels=self.vowels)
+        sentence            = out[0]
+        vowels              = out[1]
+        vowel_out           = out[2] 
+        vowel_in            = out[3]
         
         # Update vowels
-        self.vowels   = vowels
+        self.vowels         = vowels
         
         # Update sentence
-        self.sentence = sentence
+        self.sentence[turn] = sentence
         
-        return
+        # Message to output for admin mode
+        msg                 = 'Turn %s: %s changed vowel %s to vowel %s in every word.' %(turn, self.idd, vowel_out, vowel_in)
         
+        return msg
+        
+    def VowtoVow_Single(self, turn, *args, **kwargs):
+        ''''
+        Vowel to vowel on a single word rule.
+        
+        :param str turn: name of the turn to put in the sentence dict
+        '''
+        
+        # Transform sentence
+        out                 = sen.VowtoVow_Single(self.sentence, self.language)
+        sentence            = out[0]
+        vowels              = out[1]
+        vowel_out           = out[2] 
+        vowel_in            = out[3]
 
 
 

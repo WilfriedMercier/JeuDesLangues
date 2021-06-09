@@ -13,7 +13,7 @@ from   PyQt5.QtGui       import QKeySequence, QPalette, QColor, QStandardItemMod
 
 # Custom backend functions
 import backend           as     bkd
-import backend.sentences as snt
+import backend.sentences as     snt
 
 class App(QMainWindow):
    '''Main application.'''

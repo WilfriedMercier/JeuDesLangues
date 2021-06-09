@@ -223,13 +223,16 @@ def VowtoVow_Single(sentence, language):
                if alternation in word:
                   sentence_rec[pos] = sentence_rec[pos].replace(alternation, vowel_in)
 
-   # Remove the previous vowel from the vowel list and add the new one if necessary
-   vowels.remove(vowel_out)
-   if vowel_in not in vowels:
-      vowels.append(vowel_in)
-
    # Reconstruct the sentence
    sentence = ' '.join(sentence_rec)
+
+   # Remove the previous vowel from the vowel list if it disappeared from the sentence
+   if vowel_out not in sentence:
+       vowels.remove(vowel_out)
+       
+   # Add the new vowel into the vowel list if it was not already present
+   if vowel_in not in vowels:
+      vowels.append(vowel_in)
 
    return sentence, word, vowels, vowel_out, vowel_in
 
