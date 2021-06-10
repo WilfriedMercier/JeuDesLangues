@@ -8,7 +8,7 @@ from   glob              import glob
 from   PyQt5.QtGui       import QIcon, QPixmap
 
 # Custom imports
-from   backend.sentences import VowtoVow_All, make_sentences
+import backend.sentences as     sen
 
 class LanguageGroup:
     '''A class which combines all data relative to a language group.'''
@@ -27,8 +27,8 @@ class LanguageGroup:
         
         self.id          = idd
         
-        # Keep track of sentences each turn in a dict
-        self.sentence    = {'0' : sentence}
+        # Keep track of sentences each turn in a list
+        self.sentence    = [sentence]
         
         # Vowels and consonants in the sentence
         self.consonants  = consonants
@@ -38,7 +38,7 @@ class LanguageGroup:
         self.language    = language
         
         # Rule methods
-        self.ruleMethods = {'VowtoVow_All'    : self.VowtoVow,
+        self.ruleMethods = {'VowtoVow_All'    : self.VowtoVow_All,
                             'VowtoVow_Single' : self.VowtoVow_Single
                            }
         
@@ -49,11 +49,18 @@ class LanguageGroup:
         Apply a given rule to the current sentence.
         
         :param str rule: rule to apply
+        
+        :returns: message to output in admin mode
+        :rtype: str
         '''
         
-        
-        
-        return
+        if rule not in self.ruleMethods:
+            print('No rule %s found in rules methods %s' %(rule, self.ruleMethods.keys()))
+            msg = None
+        else:
+            msg = self.ruleMethods[rule](len(self.sentence))
+            
+        return msg
     
     
     ###################################
@@ -65,23 +72,26 @@ class LanguageGroup:
         Vowel to vowel on all words rule.
         
         :param str turn: name of the turn to put in the sentence dict
+        
+        :returns: output message for admin mode
+        :rtype: str
         '''
         
         # Transform sentence
-        out                 = sen.VowtoVow_All(self.sentence, self.language, vowels=self.vowels)
-        sentence            = out[0]
-        vowels              = out[1]
-        vowel_out           = out[2] 
-        vowel_in            = out[3]
+        out         = sen.VowtoVow_All(self.sentence[-1], self.language, vowels=self.vowels)
+        sentence    = out[0]
+        vowels      = out[1]
+        vowel_out   = out[2] 
+        vowel_in    = out[3]
         
         # Update vowels
-        self.vowels         = vowels
+        self.vowels = vowels
         
         # Update sentence
-        self.sentence[turn] = sentence
+        self.sentence.append(sentence)
         
         # Message to output for admin mode
-        msg                 = 'Turn %s: %s changed vowel %s to vowel %s in every word.' %(turn, self.idd, vowel_out, vowel_in)
+        msg         = 'Turn %s: %s changed vowel %s to vowel %s in every word.' %(turn, self.id, vowel_out, vowel_in)
         
         return msg
         
@@ -90,14 +100,29 @@ class LanguageGroup:
         Vowel to vowel on a single word rule.
         
         :param str turn: name of the turn to put in the sentence dict
+        
+        :returns: output message for admin mode
+        :rtype: str
         '''
         
         # Transform sentence
-        out                 = sen.VowtoVow_Single(self.sentence, self.language)
-        sentence            = out[0]
-        vowels              = out[1]
-        vowel_out           = out[2] 
-        vowel_in            = out[3]
+        out         = sen.VowtoVow_Single(self.sentence[-1], self.language)
+        sentence    = out[0]
+        word        = out[1]
+        vowels      = out[2]
+        vowel_out   = out[3] 
+        vowel_in    = out[4]
+        
+        # Update vowels
+        self.vowels = vowels
+        
+        # Update sentence
+        self.sentence.append(sentence)
+        
+        # Message to output for admin mode
+        msg         = 'Turn %s: %s changed vowel %s to vowel %s in word %s.' %(turn, self.id, vowel_out, vowel_in, word)
+        
+        return msg
 
 
 

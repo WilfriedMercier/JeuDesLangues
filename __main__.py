@@ -4,6 +4,7 @@ import sys
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 
+import random
 import os
 import os.path           as     opath
 
@@ -28,8 +29,11 @@ class App(QMainWindow):
       #        Initial setup        #
       ###############################
 
+      self.rules          = {'Modify_rule' : {},
+                             'Other_rule'  : {}
+                            }
+
       # Script current dir
-      self.rules          = {}
       self.scriptDir      = opath.dirname(opath.realpath(__file__))
       conf, ok, msg       = bkd.setup(self.scriptDir, 'configuration.yaml')
 
@@ -39,7 +43,7 @@ class App(QMainWindow):
       # Corpus
       self.corpusDir      = conf['corpusDir']
       self.corpusName     = conf['corpus']
-      self.corpusText     = bkd.make_sentences(conf['corpusText'])
+      self.corpusText     = snt.make_sentences(conf['corpusText'])
 
       # Icons
       self.icons          = conf['icons']
@@ -195,8 +199,6 @@ class App(QMainWindow):
       self.layoutMain.setColumnStretch(1, 1)
       self.layoutMain.setColumnStretch(3, 1)
       self.layoutMain.setColumnStretch(2, 10)
-      
-      
 
       return
 
@@ -256,56 +258,56 @@ class App(QMainWindow):
 
       self.rulesNbGrSpin = QSpinBox()
       self.rulesNbGrSpin.setToolTip('Each player represents a language which will evolve on its own with each new turn')
-      self.rulesNbGrSpin.valueChanged.connect(lambda value: self.setRule(nbPlayers = value))
+      self.rulesNbGrSpin.valueChanged.connect(lambda value: self.setRule(nbPlayers = value, which='Other_rule'))
       self.rulesNbGrSpin.setValue(5)
       self.rulesNbGrSpin.setMinimum(1)
       self.rulesNbGrText = QLabel('Number of players')
 
       self.rulesTurnSpin = QSpinBox()
       self.rulesTurnSpin.setToolTip('Players will alter their sentence each turn to simulate the evolution of languages')
-      self.rulesTurnSpin.valueChanged.connect(lambda value: self.setRule(nbTurns = value))
+      self.rulesTurnSpin.valueChanged.connect(lambda value: self.setRule(nbTurns = value, which='Other_rule'))
       self.rulesTurnSpin.setValue(6)
       self.rulesTurnSpin.setMinimum(1)
       self.rulesTurnText = QLabel('Number of turns')
 
       self.rulesVow_Vow_S = QCheckBox('Single word vowel to vowel shift')
       self.rulesVow_Vow_S.setToolTip('A vowel will be randomly selected and replaced by another one in a single word')
-      self.rulesVow_Vow_S.stateChanged.connect(lambda value: self.setRule(Vow_Vow_S = value == 2))
+      self.rulesVow_Vow_S.stateChanged.connect(lambda value: self.setRule(VowtoVow_Single = value == 2, which='Modify_rule'))
       self.rulesVow_Vow_S.setChecked(True)
 
       self.rulesVow_Vow_A = QCheckBox('All words vowel to vowel shift')
       self.rulesVow_Vow_A.setToolTip('A vowel will be randomly selected and replaced by another one in every word containing that vowel')
-      self.rulesVow_Vow_A.stateChanged.connect(lambda value: self.setRule(Vow_Vow_A = value == 2))
+      self.rulesVow_Vow_A.stateChanged.connect(lambda value: self.setRule(VowtoVow_All = value == 2, which='Modify_rule'))
       self.rulesVow_Vow_A.setChecked(True)
 
       self.rulesCon_Con_S  = QCheckBox('Single word consonant to consonant shift')
       self.rulesCon_Con_S.setToolTip('A consonant will be randomly selected and replaced by another one in a single word')
-      self.rulesCon_Con_S.stateChanged.connect(lambda value: self.setRule(Con_Con_S = value == 2))
+      self.rulesCon_Con_S.stateChanged.connect(lambda value: self.setRule(Con_Con_S = value == 2, which='Modify_rule'))
       self.rulesCon_Con_S.setChecked(True)
 
       self.rulesCon_Con_A  = QCheckBox('All words consonant to consonant shift')
       self.rulesCon_Con_A.setToolTip('A consonant will be randomly selected and replaced by another one in every word containing that consonant')
-      self.rulesCon_Con_A.stateChanged.connect(lambda value: self.setRule(Con_Con_A = value == 2))
+      self.rulesCon_Con_A.stateChanged.connect(lambda value: self.setRule(Con_Con_A = value == 2, which='Modify_rule'))
       self.rulesCon_Con_A.setChecked(True)
 
       self.rulesLet_Let_S  = QCheckBox('Single word letter to letter shift')
       self.rulesLet_Let_S.setToolTip('A letter will be randomly selected and replaced by another one in a single word')
-      self.rulesLet_Let_S.stateChanged.connect(lambda value: self.setRule(Let_Let_S = value == 2))
+      self.rulesLet_Let_S.stateChanged.connect(lambda value: self.setRule(Let_Let_S = value == 2, which='Modify_rule'))
       self.rulesLet_Let_S.setChecked(True)
 
       self.rulesLet_Let_A  = QCheckBox('All words letter to letter shift')
       self.rulesLet_Let_A.setToolTip('A letter will be randomly selected and replaced by another one in every word containing that lettter')
-      self.rulesLet_Let_A.stateChanged.connect(lambda value: self.setRule(Let_Let_A = value == 2))
+      self.rulesLet_Let_A.stateChanged.connect(lambda value: self.setRule(Let_Let_A = value == 2, which='Modify_rule'))
       self.rulesLet_Let_A.setChecked(True)
 
       self.rulesDel        = QCheckBox('Letter deletion')
       self.rulesDel.setToolTip('A letter will be randomly selected and removed from a single word')
-      self.rulesDel.stateChanged.connect(lambda value: self.setRule(Delete = value == 2))
+      self.rulesDel.stateChanged.connect(lambda value: self.setRule(Delete = value == 2, which='Modify_rule'))
       self.rulesDel.setChecked(True)
 
       self.rulesSwap       = QCheckBox('Swap two words')
       self.rulesSwap.setToolTip('Two consecutive words will be randomly selected and interchanged in the sentence')
-      self.rulesSwap.stateChanged.connect(lambda value: self.setRule(Swap = value == 2))
+      self.rulesSwap.stateChanged.connect(lambda value: self.setRule(Swap = value == 2, which='Modify_rule'))
       self.rulesSwap.setChecked(True)
 
 
@@ -360,6 +362,32 @@ class App(QMainWindow):
       self.tabs.addTab(self.tabSettings, "&Settings")
 
       return
+  
+    
+   ##############################################
+   #          Treeview related methods          #
+   ##############################################
+   
+   def addLine(self, name, turn, sentence):
+       '''
+       Add a line to the treeview.
+
+       :param str name: name of the group
+       :param int turn: turn corresponding to the given sentence
+       :param str sentence: sentence to show in the treeview
+       '''
+       
+       # Testing
+       rootNode = self.model.invisibleRootItem()
+       name     = QStandardItem('Test')
+       row      = QStandardItem('%d' %(self.model.rowCount()+1))
+       sentence = QStandardItem('This is a test')
+
+       item     = (name, row, sentence)
+       
+       #rootNode.appendRow(item) 
+       
+       return
 
 
    ############################################
@@ -387,15 +415,24 @@ class App(QMainWindow):
    def startGame(self, *args, **kwargs):
        '''Start the game.'''
        
-       rootNode = self.model.invisibleRootItem()
-       name     = QStandardItem('Test')
-       row      = QStandardItem('%d' %(self.model.rowCount()+1))
-       sentence = QStandardItem('This is a test')
-
-       item     = (name, row, sentence)
+       # Create as many groups as necessary
+       nbGroups     = self.rulesNbGrSpin.value()
+       groups       = [bkd.LanguageGroup(self.sentence, self.language, self.language['vowels'], self.language['consonants'], idd='Group %d' %i) for i in range(1, nbGroups+1)]
        
-       rootNode.appendRow(item) 
-       
+       # Loop through each turn
+       nbTurns      = self.rulesTurnSpin.value()
+       for i in range(nbTurns):
+           
+           # Pick a rule (we will remove the loop once we've included all the methods)
+           rule     = random.choice(list(self.rules['Modify_rule'].keys()))
+           while rule not in ['VowtoVow_All', 'VowtoVow_Single']:
+               rule = random.choice(list(self.rules['Modify_rule'].keys()))
+           
+           # Loop through each group
+           for group in groups:
+               msg  = group.applyRule(rule)
+               print(msg)
+           
        return
    
     
@@ -559,15 +596,18 @@ class App(QMainWindow):
       else:
          return False
 
-   def setRule(self, *args, **kwargs):
+   def setRule(self, which=None, **kwargs):
       '''
       Set a rule with the given value. Function should be called as follows
 
-      ... self.setRule(someRule = someValue)
+      ... self.setRule(someRule = someValue, which='Other_rule')
       '''
-
+      
+      if which is None:
+          raise ValueError('which parameter must not be None to set a rule.')
+        
       for item, value in kwargs.items():
-         self.rules[item] = value
+          self.rules[which][item] = value
 
       return
 
