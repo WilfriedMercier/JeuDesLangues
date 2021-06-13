@@ -1,0 +1,84 @@
+genSenButton:
+  tooltip: 'Click to randomly draw a new sentence form the corpus'
+senBox:
+  title: 'Sentence'
+word:
+  - 'word'
+  - 'words'
+senLabel:
+  tooltip: 'Provide and validate a guess to see the sentence.'
+scoreBox:
+  title: 'Score'
+playButton:
+  tooltip: 'Click to start the game'
+model:
+  headers:
+    - 'Group'
+    - 'Turn'
+    - 'Sentence'
+guessEntry:
+  tooltip: 'Enter your guess for the mother sentence'
+validateButton:
+  tooltip: 'Click to validate your guess for the mother sentence'
+inputText:
+  text: 'Corpus file'
+inputEntry:
+  tooltip: 'Enter a corpus file name to generate sentences from'
+inputButton:
+  tooltip: 'Select a corpus text file to generate sentences from'
+minwordText:
+  text: 'Minimum number of words'
+minwordSpin:
+  tooltip: 'Sentences will be drawn from a corpus file with a number of words between the minimum and maximum allowed. The more words, the harder it gets.'
+  suffix: ' words'
+maxwordText:
+  text: 'Maximum number of words'
+maxwordSpin:
+  tooltip: 'Sentences will be drawn from a corpus file with a number of words between the minimum and maximum allowed. The more words, the harder it gets.'
+  suffix: ' words'
+rulesBox:
+  title: 'Rules'
+rulesNbGrSpin:
+  tooltip: 'Each group represents a language which will evolve on its own with each new turn'
+rulesNbGrText:
+  text: 'Number of language groups'
+rulesTurnSpin:
+  tooltip: 'Players will alter their sentence each turn to simulate the evolution of languages'
+rulesTurnText:
+  text: 'Number of turns'
+rulesVow_Vow_S:
+  text: 'Single word vowel to vowel shift'
+  tooltip: 'A vowel will be randomly selected and replaced by another one in a single word'
+rulesVow_Vow_A:
+  text: 'All words vowel to vowel shift'
+  tooltip: 'A vowel will be randomly selected and replaced by another one in every word containing that vowel'
+rulesCon_Con_S:
+  text: 'Single word consonant to consonant shift'
+  tooltip: 'A consonant will be randomly selected and replaced by another one in a single word'
+rulesCon_Con_A:
+  text: 'All words consonant to consonant shift'
+  tooltip: 'A consonant will be randomly selected and replaced by another one in every word containing that consonant'
+rulesLet_Let_S:
+  text: 'Single word letter to letter shift'
+  tooltip: 'A letter will be randomly selected and replaced by another one in a single word'
+rulesLet_Let_A:
+  text: 'All words letter to letter shift'
+  tooltip: 'A letter will be randomly selected and replaced by another one in every word containing that lettter'
+rulesDel:
+  text: 'Letter deletion'
+  tooltip: 'A letter will be randomly selected and removed from a single word'
+rulesSwap:
+  text: 'Swap two words'
+  tooltip: 'Two consecutive words will be randomly selected and interchanged in the sentence'
+selectCorpus:
+  caption: 'Load a corpus file...'
+
+
+
+
+
+
+
+
+
+
