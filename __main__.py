@@ -76,11 +76,13 @@ class App(QMainWindow):
       ############################################
 
       self.okPalette      = QPalette()
-      green               = QColor('darkgreen')
+      self.okColorName    = 'darkgreen'
+      green               = QColor(self.okColorName)
       self.okPalette.setColor(QPalette.Text, green)
 
       self.errorPalette   = QPalette()
-      red                 = QColor('firebrick')
+      self.errorColorName = 'firebrick'
+      red                 = QColor(self.errorColorName)
       self.errorPalette.setColor(QPalette.Text, red)
 
 
@@ -137,11 +139,25 @@ class App(QMainWindow):
       self.genSenButton.clicked.connect(self.newSentence)
 
       # Sentence label
-      self.senBox          = QGroupBox('Selected sentence')
+      self.senBox          = QGroupBox('Sentence')
       self.layoutSenbox    = QGridLayout()
 
       self.senLabel        = QLabel('')
-      self.senLabel.setToolTip('')
+      self.senLabel.setToolTip('Provide and validate a guess to see the sentence.')
+      
+      # Guess label only shown when the validate button is hit
+      self.guessLabel      = QLabel('')
+      self.guessLabel.setTextFormat(Qt.RichText)
+      
+      # Score label
+      self.scoreBox        = QGroupBox('Score')
+      self.layoutScore     = QGridLayout()
+      
+      self.scoreLabel      = QLabel('/10')
+      self.scoreLabel.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
+      self.scoreLabel.setStyleSheet('''font-size: 24px;
+                                       font: bold italic "Dyuthi";
+                                    ''')
       
       # Play button
       self.playButton      = QPushButton('')
@@ -163,7 +179,11 @@ class App(QMainWindow):
       # User guess line
       self.guessEntry      = QLineEdit('')
       self.guessEntry.setAlignment(Qt.AlignTop)
+      self.guessEntry.setClearButtonEnabled(True)
+      self.guessEntry.isRedoAvailable = True
+      self.guessEntry.isUndoAvailable = True
       self.guessEntry.setToolTip('Enter your guess for the mother sentence')
+      self.guessEntry.textChanged.connect(self.guessEdited)
       self.guessEntry.setEnabled(False)
       
       # Validate button
@@ -183,26 +203,34 @@ class App(QMainWindow):
       # Generate sentence button
       self.layoutMain.addWidget(self.genSenButton,   1, 1)
       self.layoutMain.addWidget(self.senBox,         1, 2)
+      self.layoutMain.addWidget(self.scoreBox,       1, 3)
 
       # Sentence box widgets
       self.layoutSenbox.addWidget(self.senLabel,     1, 1)
+      self.layoutSenbox.addWidget(self.guessLabel,   2, 1)
       self.senBox.setLayout(self.layoutSenbox)
       
+      # Score box widgets
+      self.layoutScore.addWidget(self.scoreLabel,   1, 1)
+      self.scoreBox.setLayout(self.layoutScore)
+      
       # Play button
-      self.layoutMain.addWidget(self.playButton,     1, 3)
+      self.layoutMain.addWidget(self.playButton,     1, 4)
 
       # User guess line
-      self.layoutMain.addWidget(self.guessEntry,     2, 1, 1, 2)
+      self.layoutMain.addWidget(self.guessEntry,     2, 1, 1, 3)
       
       # Validate button
-      self.layoutMain.addWidget(self.validateButton, 2, 3)
+      self.layoutMain.addWidget(self.validateButton, 2, 4)
 
       # Treeview
-      self.layoutMain.addWidget(self.treeview,       3, 1, 1, 3)
+      self.layoutMain.addWidget(self.treeview,       3, 1, 1, 4)
 
       # Column stretch
       self.layoutMain.setColumnStretch(1, 1)
       self.layoutMain.setColumnStretch(3, 1)
+      self.layoutMain.setColumnStretch(3, 2)
+      self.layoutMain.setColumnStretch(4, 1)
       self.layoutMain.setColumnStretch(2, 10)
 
       return
@@ -221,6 +249,9 @@ class App(QMainWindow):
       # Top line input entry
       self.inputEntry = QLineEdit(self.corpusName)
       self.inputEntry.setAlignment(Qt.AlignTop)
+      self.inputEntry.setClearButtonEnabled(True)
+      self.inputEntry.isRedoAvailable = True
+      self.inputEntry.isUndoAvailable = True
       self.inputEntry.setToolTip('Enter a corpus file name to generate sentences from')
       self.inputEntry.setPalette(self.okPalette)
       self.inputEntry.textEdited.connect(self.checkAndLoadCorpus)
@@ -406,6 +437,11 @@ class App(QMainWindow):
 
       # Update sentence
       self.sentence, self.words, nb = snt.pick_sentence(self.corpusText, self.minwordSpin.value(), self.maxwordSpin.value())
+      sentence_split                = self.sentence.split(' ')
+      if sentence_split[0] in ['--', '-']:
+           self.sentence            = self.sentence[len(sentence_split[0])+1:]
+      
+      # Update label
       self.senLabel.setText('*' * len(self.sentence))
       
       # Update label
@@ -429,10 +465,16 @@ class App(QMainWindow):
        # Clear treeview
        self.model.removeRows(0, self.model.rowCount())
        
+       # Clear guess label
+       self.guessLabel.setText('')
+       
        # Enable start game button and disable following buttons
        self.playButton.setEnabled(True)
        self.guessEntry.setEnabled(False)
        self.validateButton.setEnabled(False)
+       
+       # Reset score
+       self.scoreLabel.setText('/10')
        
        return
   
@@ -463,7 +505,7 @@ class App(QMainWindow):
        # Add each group to the treeview
        for group in groups:
            name     = group.id
-           turn     = len(group.sentence)
+           turn     = len(group.sentence)-1
            sentence = group.sentence[-1]
            
            self.addLine(name, turn, sentence)
@@ -473,13 +515,76 @@ class App(QMainWindow):
        
        # Let the user give their answer
        self.guessEntry.setEnabled(True)
-       self.validateButton.setEnabled(True)
        
+       return
+   
+    
+   def setScore(self, score, *args, **kwargs):
+       '''
+       Set the score.
+
+       :param float score: score
+       '''
+       
+       strScore     = '%.1f' %score
+       if strScore[-2:] == '.0':
+           strScore = strScore[:-2]
+       
+       if score < 5:
+           text     = self.setBadText(strScore)
+       elif score > 7:
+           text     = self.setOkText(    strScore)
+       else:
+           text     = self.setMediumText(   strScore)
+           
+       self.scoreLabel.setText(text + '/10')
        return
    
     
    def validateGame(self, *args, **kwargs):
        '''Actions taken when the validate button is hit.'''
+       
+       # User sentence split in words, but keeping characters such as ,
+       sentence                      = self.guessEntry.text()
+       sentence_split                = sentence.split(' ')
+       sentence_rec                  = ''
+       
+       # Words from the user guess
+       words                         = snt.make_words(sentence)
+       
+       score                         = 0
+       
+       for guess, true, full in zip(words, self.words, sentence_split):
+           
+           # Split full word to only keep the word part of it
+           full_split                = full.partition(guess)
+           
+           for pos in range(3):
+               
+               # We only colorise the word, not the characters around
+               if pos != 1:
+                   sentence_rec     += full_split[pos]
+               else:
+       
+                   # If guess is similar to the word, we apply ok color, else we apply bad color
+                   if guess.lower() == true.lower():
+                       sentence_rec += self.setOkText(full_split[pos])
+                       score        += 1
+                   else:
+                       sentence_rec += self.setBadText(full_split[pos])
+                       
+           sentence_rec             += ' '
+           
+       # Need to deal with punctuation at the end
+       if sentence_split[-1] in ['!', '?', '.', ',', ';', ':'] and sentence_split[-1] != sentence_rec[-2]:
+           sentence_rec             += sentence_split[-1]
+       
+       self.senLabel.setText(self.sentence)
+       self.guessLabel.setText(sentence_rec)
+       self.guessEntry.setText('')
+       
+       # Set score
+       self.setScore(score/len(self.words)*10)
        
        return
 
@@ -632,6 +737,52 @@ class App(QMainWindow):
          return True
       else:
          return False
+     
+   def guessEdited(self, text, *args, **kwargs):
+       '''Actions taken when the guess is edited.'''
+       
+       if text != '':
+           self.validateButton.setEnabled(True)
+       else:
+           self.validateButton.setEnabled(False)
+           
+       return
+   
+   def setBadText(self, text, *args, **kwargs):
+       '''
+       Transform a text into rich text with a red color.
+
+       :param str text: plain text
+       
+       :returns: html formatted text
+       :rtype: str
+       '''
+       
+       return '<font color="%s">%s</font>' %(self.errorColorName, text)
+   
+   def setMediumText(self, text, *args, **kwargs):
+       '''
+       Transform a text into rich text with an orange color.
+
+       :param str text: plain text
+       
+       :returns: html formatted text
+       :rtype: str
+       '''
+       
+       return '<font color="darkorange">%s</font>' %text
+
+   def setOkText(self, text, *args, **kwargs):
+       '''
+       Transform a text into rich text with a green color.
+
+       :param str text: plain text
+       
+       :returns: html formatted text
+       :rtype: str
+       '''
+       
+       return '<font color="%s">%s</font>' %(self.okColorName, text)
 
    def setRule(self, which=None, **kwargs):
       '''

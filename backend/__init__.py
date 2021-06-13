@@ -58,7 +58,7 @@ class LanguageGroup:
             print('No rule %s found in rules methods %s' %(rule, self.ruleMethods.keys()))
             msg = None
         else:
-            msg = self.ruleMethods[rule](len(self.sentence)-1)
+            msg = self.ruleMethods[rule](len(self.sentence))
             
         return msg
     
