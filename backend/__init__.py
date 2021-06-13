@@ -240,10 +240,48 @@ def loadLanguage(scriptPath, languagePath, languageFile, alt=True):
       ok      = True
       msg     = ''
    else:
+      conf    = {}
       ok      = False
       msg     = 'Language file %s could not be found.' %file
 
    return conf, ok, msg
+
+def loadTranslation(scriptPath, transFile, transPath='translations'):
+    '''
+    Load and setup interface language.
+
+    :param str scriptPath: path where the main program is located
+    :param str transFile: language interface file
+    :param str transPath: (**Optional**) path where the translations files are located
+
+    :returns: translation dictionary, ok flag and error message
+    :rtype: dict, bool, str
+    '''
+    
+    path                   = opath.join(scriptPath, transPath)
+    files                  = glob(opath.join(path, '*.yaml'))
+    file                   = opath.join(scriptPath, transPath, transFile)
+    
+    conf                   = {'translations' : files}
+    if opath.isfile(file):
+       
+        conf['trans_prop'] = setupTranslation(file)
+        conf['trans_name'] = transFile.rsplit('.yaml')[0]
+        ok                 = True
+        msg                = ''
+    else:
+        ok                 = False
+        msg                = 'Translation file %s could not be fonud.' %file
+    
+    return conf, ok, msg
+
+def setupTranslation(file):
+    '''Utility function to easily change translation. See loadTranslation.'''
+    
+    with open(file, 'r') as f:
+        trans = yaml.load(f, Loader=yaml.Loader)
+    
+    return trans
 
 def setup(scriptPath, configFile):
    '''
@@ -304,5 +342,13 @@ def setup(scriptPath, configFile):
       conf['consonants']        = language['consonants']
       conf['map_alternate']     = language['map_alternate']
       conf['map_alternate_inv'] = language['map_alternate_inv']
+      
+      # Load translation file
+      translation               = loadTranslation(scriptPath, conf['interfaceLanguage'])
+      
+      conf['translations']      = translation['translations']
+      conf['trans_prop']        = translation['trans_prop']
+      conf['trans_name']        = translation['trans_name']
+      conf.pop('interfaceLanguage')
 
       return conf, ok, msg

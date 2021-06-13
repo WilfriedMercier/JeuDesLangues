@@ -1,6 +1,7 @@
 iconDir: 'icons'
 corpusDir: 'corpus'
 corpus: 'corpus_balzac.txt'
+interfaceLanguage: 'English.yaml'
 formats:
 - 'xbm'
 - 'xpm'

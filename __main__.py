@@ -56,6 +56,11 @@ class App(QMainWindow):
       self.words          = []
       self.vowels         = []
       self.consonants     = []
+      
+      # Interface language
+      self.translations   = conf['translations']
+      self.currentTrans   = conf['trans_name']
+      self.trans_prop     = conf['trans_prop']
 
       # Window
       self.win            = QWidget()
@@ -297,6 +302,7 @@ class App(QMainWindow):
       self.rulesNbGrSpin.valueChanged.connect(lambda value: self.setRule(nbPlayers = value, which='Other_rule'))
       self.rulesNbGrSpin.setValue(5)
       self.rulesNbGrSpin.setMinimum(1)
+      
       self.rulesNbGrText = QLabel('Number of language groups')
 
       self.rulesTurnSpin = QSpinBox()
@@ -304,6 +310,7 @@ class App(QMainWindow):
       self.rulesTurnSpin.valueChanged.connect(lambda value: self.setRule(nbTurns = value, which='Other_rule'))
       self.rulesTurnSpin.setValue(6)
       self.rulesTurnSpin.setMinimum(1)
+      
       self.rulesTurnText = QLabel('Number of turns')
 
       self.rulesVow_Vow_S = QCheckBox('Single word vowel to vowel shift')
@@ -450,7 +457,7 @@ class App(QMainWindow):
       else:
           word = 'words'
           
-      self.senBox.setTitle('Selected sentence - %d %s' %(nb, word))
+      self.senBox.setTitle('Sentence - %d %s' %(nb, word))
       self.resetGame()
       
       # Extract vowels and consonants from sentence
@@ -499,8 +506,6 @@ class App(QMainWindow):
            for group in groups:
                msg  = group.applyRule(rule)
                print(msg)
-               print('Sentence:', group.sentence[-1])
-               print('Vowels:', group.vowels)
                
        # Add each group to the treeview
        for group in groups:
@@ -678,6 +683,14 @@ class App(QMainWindow):
       else:
          return None
 
+
+   #################################################
+   #          Translation related methods          #
+   #################################################
+   
+   def setInterfaceLanguage(self, *args, **kwargs):
+       '''Set the language in the interface.'''
+   
 
    ####################################
    #          Number of words         #
