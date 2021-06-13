@@ -146,7 +146,11 @@ def VowtoVow_All(sentence, language, vowels=None):
 
    if vowels is None:
       raise ValueError('A vowels list must be given.')
-
+      
+   # If no vowel found, do not go further
+   if len(vowels) == 0:
+       return None, None, None, None
+       
    # Pick a vowel in the sentence
    vowel_out         = random.choice(vowels)
 
@@ -179,19 +183,34 @@ def VowtoVow_Single(sentence, language):
    :returns: modified sentence, picked word, new vowels list, vowel removed, vowel added
    :rtype: str, str, list[str], str, str
    '''
+   
+   # Split words from sentence
+   words_all          = make_words(sentence)
+   
+   # Only keep words which have vowels
+   words              = []
+   vowels_list        = []
+   for w in words_all:
+       
+       vow, con       = make_vowels_consonants(w, language)
+       if len(vow) != 0:
+           words.append(w)
+           vowels_list.append(vow)
+           
+   # If no vowel found, do not go further
+   if len(words) == 0:
+       return None, None, None, None, None
 
    ##################################
    #         Random choices         #
    ##################################
 
    # Pick a random word
-   words              = make_words(sentence)
-   word               = random.choice(words)
+   pos                = random.choice(range(len(words)))
+   word               = words[pos]
+   vowels             = vowels_list[pos]
 
-   # Extract vowels and consonants
-   vowels, consonants = make_vowels_consonants(word, language)
-
-   # Pick a vowel in the sentence
+   # Pick a vowel in the selected word
    vowel_out          = random.choice(vowels)
 
    # Pick a vowel to put in the sentence

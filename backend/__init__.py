@@ -17,10 +17,10 @@ class LanguageGroup:
         '''
         Init method for this class.
         
-        :param list consonants: list of consonants
+        :param list consonants: list of consonants in the sentence
         :param dict language: dictionary representing the considered language
         :param str sentence: main sentence which is going to be modified
-        :param list vowels: list of vowels
+        :param list vowels: list of vowels in the sentence
         
         :param str idd: (**Optional**) identifier for this language group
         '''
@@ -58,7 +58,7 @@ class LanguageGroup:
             print('No rule %s found in rules methods %s' %(rule, self.ruleMethods.keys()))
             msg = None
         else:
-            msg = self.ruleMethods[rule](len(self.sentence))
+            msg = self.ruleMethods[rule](len(self.sentence)-1)
             
         return msg
     
@@ -79,19 +79,24 @@ class LanguageGroup:
         
         # Transform sentence
         out         = sen.VowtoVow_All(self.sentence[-1], self.language, vowels=self.vowels)
-        sentence    = out[0]
-        vowels      = out[1]
-        vowel_out   = out[2] 
-        vowel_in    = out[3]
-        
-        # Update vowels
-        self.vowels = vowels
-        
-        # Update sentence
-        self.sentence.append(sentence)
-        
-        # Message to output for admin mode
-        msg         = 'Turn %s: %s changed vowel %s to vowel %s in every word.' %(turn, self.id, vowel_out, vowel_in)
+        if None not in out:
+
+            sentence    = out[0]
+            vowels      = out[1]
+            vowel_out   = out[2] 
+            vowel_in    = out[3]
+            
+            # Update vowels
+            self.vowels = vowels
+            
+            # Update sentence
+            self.sentence.append(sentence)
+            
+            # Message to output for admin mode
+            msg         = 'Turn %s: %s changed vowel %s to vowel %s in every word.' %(turn, self.id, vowel_out, vowel_in)
+        else:
+            self.sentence.append(self.sentence[-1])
+            msg         = 'Turn %s: %s made no modifications because no vowel was found in the sentence.' %(turn, self.id)
         
         return msg
         
@@ -106,22 +111,29 @@ class LanguageGroup:
         '''
         
         # Transform sentence
-        out         = sen.VowtoVow_Single(self.sentence[-1], self.language)
-        sentence    = out[0]
-        word        = out[1]
-        vowels      = out[2]
-        vowel_out   = out[3] 
-        vowel_in    = out[4]
+        out             = sen.VowtoVow_Single(self.sentence[-1], self.language)
+        if None not in out:
         
-        # Update vowels
-        self.vowels = vowels
+            sentence    = out[0]
+            word        = out[1]
+            vowels      = out[2]
+            vowel_out   = out[3] 
+            vowel_in    = out[4]
+            
+            # Update vowels
+            for vowel in vowels:
+                if vowel not in self.vowels:
+                    self.vowels.append(vowel)
+            
+            # Update sentence
+            self.sentence.append(sentence)
         
-        # Update sentence
-        self.sentence.append(sentence)
-        
-        # Message to output for admin mode
-        msg         = 'Turn %s: %s changed vowel %s to vowel %s in word %s.' %(turn, self.id, vowel_out, vowel_in, word)
-        
+            # Message to output for admin mode
+            msg         = 'Turn %s: %s changed vowel %s to vowel %s in word %s.' %(turn, self.id, vowel_out, vowel_in, word)
+        else:
+            self.sentence.append(self.sentence[-1])
+            msg         = 'Turn %s: %s made no modifications because no vowel was found in sentence.' %(turn, self.id)
+            
         return msg
 
 

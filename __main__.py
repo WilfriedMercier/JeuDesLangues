@@ -54,6 +54,8 @@ class App(QMainWindow):
       # Sentence to be modified by the game
       self.sentence       = ''
       self.words          = []
+      self.vowels         = []
+      self.consonants     = []
 
       # Window
       self.win            = QWidget()
@@ -148,6 +150,7 @@ class App(QMainWindow):
       self.playButton.setIconSize(QSize(24, 24))
       self.playButton.setToolTip('Click to start the game')
       self.playButton.clicked.connect(self.startGame)
+      self.playButton.setEnabled(False)
       
       # Treeview with groups sentences
       self.treeview        = QTreeView( )
@@ -161,6 +164,7 @@ class App(QMainWindow):
       self.guessEntry      = QLineEdit('')
       self.guessEntry.setAlignment(Qt.AlignTop)
       self.guessEntry.setToolTip('Enter your guess for the mother sentence')
+      self.guessEntry.setEnabled(False)
       
       # Validate button
       self.validateButton  = QPushButton('')
@@ -169,6 +173,7 @@ class App(QMainWindow):
       self.validateButton.setIconSize(QSize(24, 24))
       self.validateButton.setToolTip('Click to validate your guess for the mother sentence')
       self.validateButton.clicked.connect(self.validateGame)
+      self.validateButton.setEnabled(False)
 
 
       #################################
@@ -257,11 +262,11 @@ class App(QMainWindow):
       self.layoutRules   = QGridLayout()
 
       self.rulesNbGrSpin = QSpinBox()
-      self.rulesNbGrSpin.setToolTip('Each player represents a language which will evolve on its own with each new turn')
+      self.rulesNbGrSpin.setToolTip('Each group represents a language which will evolve on its own with each new turn')
       self.rulesNbGrSpin.valueChanged.connect(lambda value: self.setRule(nbPlayers = value, which='Other_rule'))
       self.rulesNbGrSpin.setValue(5)
       self.rulesNbGrSpin.setMinimum(1)
-      self.rulesNbGrText = QLabel('Number of players')
+      self.rulesNbGrText = QLabel('Number of language groups')
 
       self.rulesTurnSpin = QSpinBox()
       self.rulesTurnSpin.setToolTip('Players will alter their sentence each turn to simulate the evolution of languages')
@@ -377,15 +382,17 @@ class App(QMainWindow):
        :param str sentence: sentence to show in the treeview
        '''
        
-       # Testing
+       # Root item
        rootNode = self.model.invisibleRootItem()
-       name     = QStandardItem('Test')
-       row      = QStandardItem('%d' %(self.model.rowCount()+1))
-       sentence = QStandardItem('This is a test')
-
-       item     = (name, row, sentence)
        
-       #rootNode.appendRow(item) 
+       # Define Items
+       name     = QStandardItem(name)
+       turn     = QStandardItem('%d' %turn)
+       sentence = QStandardItem(sentence)
+       item     = (name, turn, sentence)
+       
+       # Append line to the treeview
+       rootNode.appendRow(item) 
        
        return
 
@@ -408,8 +415,26 @@ class App(QMainWindow):
           word = 'words'
           
       self.senBox.setTitle('Selected sentence - %d %s' %(nb, word))
+      self.resetGame()
+      
+      # Extract vowels and consonants from sentence
+      self.vowels, self.consonants  = snt.make_vowels_consonants(self.sentence, self.language)
       
       return
+  
+    
+   def resetGame(self, *args, **kwargs):
+       '''Reset the interface and properties related to the game.'''
+       
+       # Clear treeview
+       self.model.removeRows(0, self.model.rowCount())
+       
+       # Enable start game button and disable following buttons
+       self.playButton.setEnabled(True)
+       self.guessEntry.setEnabled(False)
+       self.validateButton.setEnabled(False)
+       
+       return
   
     
    def startGame(self, *args, **kwargs):
@@ -417,7 +442,7 @@ class App(QMainWindow):
        
        # Create as many groups as necessary
        nbGroups     = self.rulesNbGrSpin.value()
-       groups       = [bkd.LanguageGroup(self.sentence, self.language, self.language['vowels'], self.language['consonants'], idd='Group %d' %i) for i in range(1, nbGroups+1)]
+       groups       = [bkd.LanguageGroup(self.sentence, self.language, self.vowels, self.consonants, idd='Group %d' %i) for i in range(1, nbGroups+1)]
        
        # Loop through each turn
        nbTurns      = self.rulesTurnSpin.value()
@@ -432,7 +457,24 @@ class App(QMainWindow):
            for group in groups:
                msg  = group.applyRule(rule)
                print(msg)
+               print('Sentence:', group.sentence[-1])
+               print('Vowels:', group.vowels)
+               
+       # Add each group to the treeview
+       for group in groups:
+           name     = group.id
+           turn     = len(group.sentence)
+           sentence = group.sentence[-1]
            
+           self.addLine(name, turn, sentence)
+           
+       # Avoid users launching another batch again
+       self.playButton.setEnabled(False)
+       
+       # Let the user give their answer
+       self.guessEntry.setEnabled(True)
+       self.validateButton.setEnabled(True)
+       
        return
    
     
@@ -445,6 +487,16 @@ class App(QMainWindow):
    #############################################
    #           Corpus related methods          #
    #############################################
+
+   def _changeCorpusEntry(self, name, *args, **kwargs):
+      '''
+      Change the corpus entry widget value.
+
+      :param str name: corpus name
+      '''
+
+      self.inputEntry.setText(name)
+      return
 
    def _updateCorpusProp(self, file, *args, **kwargs):
       '''
@@ -546,21 +598,6 @@ class App(QMainWindow):
       else:
          self.maxwordSpin.setSuffix(' words')
       self.minwordSpin.setMaximum(value)
-      return
-
-
-   ############################################
-   #          Widgets related actions         #
-   ############################################
-
-   def _changeCorpusEntry(self, name, *args, **kwargs):
-      '''
-      Change the corpus entry widget value.
-
-      :param str name: corpus name
-      '''
-
-      self.inputEntry.setText(name)
       return
 
 
