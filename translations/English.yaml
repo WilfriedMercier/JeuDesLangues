@@ -3,8 +3,8 @@ genSenButton:
 senBox:
   title: 'Sentence'
 word:
-  - 'word'
-  - 'words'
+  singular: 'word'
+  plural: 'words'
 senLabel:
   tooltip: 'Provide and validate a guess to see the sentence.'
 scoreBox:
@@ -12,7 +12,7 @@ scoreBox:
 playButton:
   tooltip: 'Click to start the game'
 model:
-  headers:
+  headers: !!python/tuple
     - 'Group'
     - 'Turn'
     - 'Sentence'
@@ -30,12 +30,16 @@ minwordText:
   text: 'Minimum number of words'
 minwordSpin:
   tooltip: 'Sentences will be drawn from a corpus file with a number of words between the minimum and maximum allowed. The more words, the harder it gets.'
-  suffix: ' words'
+  suffix:
+    singular: ' word'
+    plural: ' words'
 maxwordText:
   text: 'Maximum number of words'
 maxwordSpin:
   tooltip: 'Sentences will be drawn from a corpus file with a number of words between the minimum and maximum allowed. The more words, the harder it gets.'
-  suffix: ' words'
+  suffix:
+    singular: ' word'
+    plural: ' words'
 rulesBox:
   title: 'Rules'
 rulesNbGrSpin:
@@ -72,13 +76,3 @@ rulesSwap:
   tooltip: 'Two consecutive words will be randomly selected and interchanged in the sentence'
 selectCorpus:
   caption: 'Load a corpus file...'
-
-
-
-
-
-
-
-
-
-

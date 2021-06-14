@@ -342,10 +342,13 @@ def setup(scriptPath, configFile):
       conf['consonants']        = language['consonants']
       conf['map_alternate']     = language['map_alternate']
       conf['map_alternate_inv'] = language['map_alternate_inv']
-      
+
       # Load translation file
-      translation               = loadTranslation(scriptPath, conf['interfaceLanguage'])
-      
+      translation, ok, msg      = loadTranslation(scriptPath, conf['interfaceLanguage'])
+
+      if not ok:
+         return {}, ok, msg
+
       conf['translations']      = translation['translations']
       conf['trans_prop']        = translation['trans_prop']
       conf['trans_name']        = translation['trans_name']

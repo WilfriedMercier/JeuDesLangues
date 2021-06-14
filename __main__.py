@@ -59,8 +59,10 @@ class App(QMainWindow):
       
       # Interface language
       self.translations   = conf['translations']
-      self.currentTrans   = conf['trans_name']
+      translation         = conf['trans_name']
+      self.currentTrans   = None
       self.trans_prop     = conf['trans_prop']
+      self.old_trans_prop = None
 
       # Window
       self.win            = QWidget()
@@ -75,6 +77,7 @@ class App(QMainWindow):
 
       self.tabSettings    = QWidget()
       self.layoutSettings = QGridLayout()
+      
 
       ############################################
       #           Common color palettes          #
@@ -109,6 +112,16 @@ class App(QMainWindow):
       # Main window layout
       self.layoutWin.addWidget(self.tabs, 1, 1)
       self.win.setLayout(self.layoutWin)
+      
+      
+      #####################################################
+      #                 Apply translation                 #
+      #####################################################
+      
+      self._setupTranslation()
+      self.translate(None)
+      self.currentTrans        = translation
+
 
       ###############################################
       #               Setup shortcuts               #
@@ -122,7 +135,160 @@ class App(QMainWindow):
       self.win.resize(800, 800)
       self.win.show()
       self.centre()
-
+      
+      
+   #########################################################################
+   #         Mapping interface translation to objects and commands         #
+   #########################################################################
+      
+   def _setupTranslation(self, *args, **kwargs):
+      '''Setup the translation properties. Must only be run once at startup.'''
+      
+      # These map names appearing in the translation file with Qt method names
+      self.setMethods = {'tooltip' : 'setToolTip',
+                         'text'    : 'setText',
+                         'title'   : 'setTitle',
+                         'headers' : 'setHorizontalHeaderLabels',
+                         'suffix:' : 'setSuffix'
+                        }
+            
+      return
+   
+   
+   def applyTranslation(self, objName, methodName, value):
+      '''
+      Apply a translation to an object using the setMethods dict.
+      
+      :param str objName: oject name as appearing in the translation file
+      :param str methodName: method name as appearing in the translation file
+      :param value: value to apply to the object
+      
+      :returns: 
+         * 0 if everything is fine
+         * -1 if object name is not an attribute
+         * -2 if object method does not exist
+      
+      '''
+      
+      # Get object and method
+      try:
+         obj    = getattr(self, objName)
+      except AttributeError:
+         return -1
+      
+      try:
+         method = getattr(obj, methodName)
+      except AttributeError:
+         return -2
+      
+      # Apply method
+      method(value)
+      
+      return 0
+   
+   def translate(self, newTransName, *args, **kwargs):
+      '''
+      Translate the interface using the currently loaded translation file.
+      
+      :param str newTransName: name of the new translation. If None or if similar to previous translation, no change is applied.
+      '''
+      
+      # Translation at startup
+      if newTransName is None:
+         for obj, value in self.trans_prop.items():
+            
+            # Skip objects which do not correspond to attributes
+            if obj in ['word', 'selectCorpus']:
+               continue
+            
+            # An object can have various methods to apply
+            for method, val in value.items():
+               
+               # Skip some methods if we do not need to apply them
+               if obj in ['minwordSpin', 'maxwordSpin'] and method == 'suffix':
+                  continue
+                  
+               method = self.setMethods[method]
+               err    = self.applyTranslation(obj, method, val)
+               
+               # This error should never be raised in theory
+               if err == -2:
+                  raise AttributeError('Method %s could not be found in object %s.' %(method, obj))
+                  
+               # This means we are dealing with objects which are not attributes
+               elif err == -1:
+                  raise AttributeError('Object %s could not be found.' %obj)
+                     
+      # Translation if interface is already drawn with a language
+      else:
+         
+         # If user picked the same translation, do nothing
+         if newTransName != self.currentTrans:
+            
+            # By default, we assume no translation file could be found
+            ok                        = False
+            
+            # Find translation in translations list
+            for transFile in self.translations:
+               if newTransName == opath.basename(transFile):
+                     
+                  # Save old translation before overwriting with new one
+                  self.old_trans_prop = self.trans_prop
+                  self.trans_prop     = bkd.setupTranslation(transFile)
+                  ok                  = True
+                  break
+            
+            # Check that a tranlation was found
+            if not ok:
+               raise IOError('No translation %s was found in translation files list %s' %(newTransName, self.translations))
+               
+            # Loop through objects
+            for obj, value in self.trans_prop.items():
+               
+               # Skip selectCorpus because it will be updated when calling the open window, word is used later on
+               if obj in ['word', 'selectCorpus']:
+                  continue
+               
+               # An object can have various methods to apply
+               for method, val in value.items():
+                  
+                  # Update spinboxes using same value to update word according to the singular or plural form in use
+                  if obj in ['minwordSpin', 'maxwordSpin'] and method == 'suffix':
+                     if obj == 'minwordSpin':
+                        self._minimumWordsChanged(self.minwordSpin.value)
+                     else:
+                        self._maximumWordsChanged(self.maxwordSpin.value)
+                        
+                  # Update sentence box label
+                  if obj == 'senBox' and method == 'title':
+                     
+                     # Get old sentence
+                     sen = self.senBox.title
+                     
+                     # Replace the sentence word
+                     sen.replace(self.old_trans_prop['title'], self.trans_prop['title'])
+                     
+                     # Replace the additional word part
+                     if self.old_trans_prop['word']['plural'] in sen:
+                        sen.replace(self.old_trans_prop['word']['plural'], self.trans_prop['word']['plural'])
+                     elif self.old_trans_prop['word']['singular'] in sen:
+                        sen.replace(self.old_trans_prop['word']['singular'], self.trans_prop['word']['singular'])
+                        
+                     val = sen
+                     
+                  method = self.setMethods[method]
+                  err    = self.applyTranslation(obj, method, val)
+                  
+                  # This error should never be raised in theory
+                  if err == -2:
+                     raise AttributeError('Method %s could not be found in object %s.' %(method, obj))
+                     
+                  # This means we are dealing with objects which are not attributes
+                  elif err == -1:
+                     raise AttributeError('Object %s could not be found.' %obj) 
+      
+      return
+               
 
    ####################################
    #          Layout methods          #
@@ -134,28 +300,26 @@ class App(QMainWindow):
       #####################
       #      Widgets      #
       #####################
-
+      
       # Generate sentence button
       self.genSenButton    = QPushButton()
       self.genSenButton.setFlat(True)
       self.genSenButton.setIcon(self.icons['NEW'])
       self.genSenButton.setIconSize(QSize(24, 24))
-      self.genSenButton.setToolTip('Click to randomly draw a new sentence form the corpus')
       self.genSenButton.clicked.connect(self.newSentence)
 
       # Sentence label
-      self.senBox          = QGroupBox('Sentence')
+      self.senBox          = QGroupBox('')
       self.layoutSenbox    = QGridLayout()
 
       self.senLabel        = QLabel('')
-      self.senLabel.setToolTip('Provide and validate a guess to see the sentence.')
       
       # Guess label only shown when the validate button is hit
       self.guessLabel      = QLabel('')
       self.guessLabel.setTextFormat(Qt.RichText)
       
       # Score label
-      self.scoreBox        = QGroupBox('Score')
+      self.scoreBox        = QGroupBox('')
       self.layoutScore     = QGridLayout()
       
       self.scoreLabel      = QLabel('/10')
@@ -169,7 +333,6 @@ class App(QMainWindow):
       self.playButton.setFlat(True)
       self.playButton.setIcon(self.icons['PLAY'])
       self.playButton.setIconSize(QSize(24, 24))
-      self.playButton.setToolTip('Click to start the game')
       self.playButton.clicked.connect(self.startGame)
       self.playButton.setEnabled(False)
       
@@ -178,7 +341,6 @@ class App(QMainWindow):
       self.model           = QStandardItemModel(0, 3)
       self.treeview.setEditTriggers(QAbstractItemView.NoEditTriggers)
       self.treeview.setSelectionMode(QAbstractItemView.NoSelection)
-      self.model.setHorizontalHeaderLabels(['Group', 'Turn', 'Sentence'])
       self.treeview.setModel(self.model)
       
       # User guess line
@@ -187,7 +349,6 @@ class App(QMainWindow):
       self.guessEntry.setClearButtonEnabled(True)
       self.guessEntry.isRedoAvailable = True
       self.guessEntry.isUndoAvailable = True
-      self.guessEntry.setToolTip('Enter your guess for the mother sentence')
       self.guessEntry.textChanged.connect(self.guessEdited)
       self.guessEntry.setEnabled(False)
       
@@ -196,7 +357,6 @@ class App(QMainWindow):
       self.validateButton.setFlat(True)
       self.validateButton.setIcon(self.icons['VALIDATE'])
       self.validateButton.setIconSize(QSize(24, 24))
-      self.validateButton.setToolTip('Click to validate your guess for the mother sentence')
       self.validateButton.clicked.connect(self.validateGame)
       self.validateButton.setEnabled(False)
 
@@ -248,7 +408,7 @@ class App(QMainWindow):
       #####################
 
       # Top line input text
-      self.inputText      = QLabel('Corpus file')
+      self.inputText      = QLabel('')
       self.inputText.setAlignment(Qt.AlignTop)
 
       # Top line input entry
@@ -257,7 +417,6 @@ class App(QMainWindow):
       self.inputEntry.setClearButtonEnabled(True)
       self.inputEntry.isRedoAvailable = True
       self.inputEntry.isUndoAvailable = True
-      self.inputEntry.setToolTip('Enter a corpus file name to generate sentences from')
       self.inputEntry.setPalette(self.okPalette)
       self.inputEntry.textEdited.connect(self.checkAndLoadCorpus)
 
@@ -265,91 +424,77 @@ class App(QMainWindow):
       self.inputButton = QPushButton('')
       self.inputButton.setIcon(self.icons['FOLDER'])
       self.inputButton.setFlat(True)
-      self.inputButton.setToolTip('Select a corpus text file to generate sentences from')
       self.inputButton.clicked.connect(self.loadCorpus)
 
       # Second line minimum words text
-      self.minwordText = QLabel('Minimum number of words')
+      self.minwordText = QLabel('')
       self.minwordText.setAlignment(Qt.AlignTop)
 
       # Second line minimum words spinbox
       self.minwordSpin = QSpinBox()
-      self.minwordSpin.setToolTip('Sentences will be drawn from a corpus file with a number of words between the minimum and maximum allowed. The more words, the harder it gets.')
-      self.minwordSpin.setSuffix(' words')
-      self.minwordSpin.setValue(3)
       self.minwordSpin.setMinimum(1)
       self.minwordSpin.setMaximum(10)
-      self.minwordSpin.valueChanged.connect(self._minimumWordsChanged)
 
       # Second line maximum words text
-      self.maxwordText   = QLabel('Maximum number of words')
+      self.maxwordText   = QLabel('')
       self.maxwordText.setAlignment(Qt.AlignTop)
 
       # Second line maximum words spinbox
       self.maxwordSpin   = QSpinBox()
-      self.maxwordSpin.setToolTip('Sentences will be drawn from a corpus file with a number of words between the minimum and maximum allowed. The more words, the harder it gets.')
-      self.maxwordSpin.setSuffix(' words')
-      self.maxwordSpin.setValue(10)
       self.maxwordSpin.setMinimum(3)
+      
+      self.minwordSpin.valueChanged.connect(self._minimumWordsChanged)
       self.maxwordSpin.valueChanged.connect(self._maximumWordsChanged)
-
+      self.minwordSpin.setValue(3)
+      self.maxwordSpin.setValue(10)
+      
       # Third line group box
-      self.rulesBox      = QGroupBox('Rules')
+      self.rulesBox      = QGroupBox('')
       self.layoutRules   = QGridLayout()
 
       self.rulesNbGrSpin = QSpinBox()
-      self.rulesNbGrSpin.setToolTip('Each group represents a language which will evolve on its own with each new turn')
       self.rulesNbGrSpin.valueChanged.connect(lambda value: self.setRule(nbPlayers = value, which='Other_rule'))
       self.rulesNbGrSpin.setValue(5)
       self.rulesNbGrSpin.setMinimum(1)
       
-      self.rulesNbGrText = QLabel('Number of language groups')
+      self.rulesNbGrText = QLabel('')
 
       self.rulesTurnSpin = QSpinBox()
-      self.rulesTurnSpin.setToolTip('Players will alter their sentence each turn to simulate the evolution of languages')
       self.rulesTurnSpin.valueChanged.connect(lambda value: self.setRule(nbTurns = value, which='Other_rule'))
       self.rulesTurnSpin.setValue(6)
       self.rulesTurnSpin.setMinimum(1)
       
-      self.rulesTurnText = QLabel('Number of turns')
+      self.rulesTurnText = QLabel('')
 
-      self.rulesVow_Vow_S = QCheckBox('Single word vowel to vowel shift')
-      self.rulesVow_Vow_S.setToolTip('A vowel will be randomly selected and replaced by another one in a single word')
+      self.rulesVow_Vow_S = QCheckBox('')
       self.rulesVow_Vow_S.stateChanged.connect(lambda value: self.setRule(VowtoVow_Single = value == 2, which='Modify_rule'))
       self.rulesVow_Vow_S.setChecked(True)
 
-      self.rulesVow_Vow_A = QCheckBox('All words vowel to vowel shift')
-      self.rulesVow_Vow_A.setToolTip('A vowel will be randomly selected and replaced by another one in every word containing that vowel')
+      self.rulesVow_Vow_A = QCheckBox('')
       self.rulesVow_Vow_A.stateChanged.connect(lambda value: self.setRule(VowtoVow_All = value == 2, which='Modify_rule'))
       self.rulesVow_Vow_A.setChecked(True)
 
-      self.rulesCon_Con_S  = QCheckBox('Single word consonant to consonant shift')
-      self.rulesCon_Con_S.setToolTip('A consonant will be randomly selected and replaced by another one in a single word')
+      self.rulesCon_Con_S  = QCheckBox('')
       self.rulesCon_Con_S.stateChanged.connect(lambda value: self.setRule(Con_Con_S = value == 2, which='Modify_rule'))
       self.rulesCon_Con_S.setChecked(True)
 
-      self.rulesCon_Con_A  = QCheckBox('All words consonant to consonant shift')
-      self.rulesCon_Con_A.setToolTip('A consonant will be randomly selected and replaced by another one in every word containing that consonant')
+      self.rulesCon_Con_A  = QCheckBox('')
       self.rulesCon_Con_A.stateChanged.connect(lambda value: self.setRule(Con_Con_A = value == 2, which='Modify_rule'))
       self.rulesCon_Con_A.setChecked(True)
 
-      self.rulesLet_Let_S  = QCheckBox('Single word letter to letter shift')
-      self.rulesLet_Let_S.setToolTip('A letter will be randomly selected and replaced by another one in a single word')
+      self.rulesLet_Let_S  = QCheckBox('')
       self.rulesLet_Let_S.stateChanged.connect(lambda value: self.setRule(Let_Let_S = value == 2, which='Modify_rule'))
       self.rulesLet_Let_S.setChecked(True)
 
-      self.rulesLet_Let_A  = QCheckBox('All words letter to letter shift')
-      self.rulesLet_Let_A.setToolTip('A letter will be randomly selected and replaced by another one in every word containing that lettter')
+      self.rulesLet_Let_A  = QCheckBox('')
       self.rulesLet_Let_A.stateChanged.connect(lambda value: self.setRule(Let_Let_A = value == 2, which='Modify_rule'))
       self.rulesLet_Let_A.setChecked(True)
 
-      self.rulesDel        = QCheckBox('Letter deletion')
-      self.rulesDel.setToolTip('A letter will be randomly selected and removed from a single word')
+      self.rulesDel        = QCheckBox('')
       self.rulesDel.stateChanged.connect(lambda value: self.setRule(Delete = value == 2, which='Modify_rule'))
       self.rulesDel.setChecked(True)
 
-      self.rulesSwap       = QCheckBox('Swap two words')
-      self.rulesSwap.setToolTip('Two consecutive words will be randomly selected and interchanged in the sentence')
+      self.rulesSwap       = QCheckBox('')
       self.rulesSwap.stateChanged.connect(lambda value: self.setRule(Swap = value == 2, which='Modify_rule'))
       self.rulesSwap.setChecked(True)
 
@@ -453,11 +598,11 @@ class App(QMainWindow):
       
       # Update label
       if nb <= 1:
-          word = 'word'
+          word                      = self.trans_prop['word']['singular']
       else:
-          word = 'words'
+          word                      = self.trans_prop['word']['plural']
           
-      self.senBox.setTitle('Sentence - %d %s' %(nb, word))
+      self.senBox.setTitle('%s - %d %s' %(self.trans_prop['senBox']['title'], nb, word))
       self.resetGame()
       
       # Extract vowels and consonants from sentence
@@ -676,20 +821,14 @@ class App(QMainWindow):
       '''
 
       dialog = QFileDialog(self.win)
-      file   = dialog.getOpenFileName(caption='Load a corpus file...', directory=opath.join(self.corpusDir), filter='*.txt')[0]
+      file   = dialog.getOpenFileName(caption=self.trans_prop['selectCorpus']['caption'], 
+                                      directory=opath.join(self.corpusDir), 
+                                      filter='*.txt')[0]
 
       if self.checkFile(file):
          return file
       else:
          return None
-
-
-   #################################################
-   #          Translation related methods          #
-   #################################################
-   
-   def setInterfaceLanguage(self, *args, **kwargs):
-       '''Set the language in the interface.'''
    
 
    ####################################
@@ -700,9 +839,9 @@ class App(QMainWindow):
       '''Actions taken when the minimum number of words changed.'''
 
       if value == 1:
-         self.minwordSpin.setSuffix(' word')
+         self.minwordSpin.setSuffix(' %s' %self.trans_prop['minwordSpin']['suffix']['singular'])
       else:
-         self.minwordSpin.setSuffix(' words')
+         self.minwordSpin.setSuffix(' %s' %self.trans_prop['minwordSpin']['suffix']['plural'])
 
       self.maxwordSpin.setMinimum(value)
       return
@@ -712,9 +851,10 @@ class App(QMainWindow):
       '''Actions taken when the maximum number of words changed.'''
 
       if value == 1:
-         self.maxwordSpin.setSuffix(' word')
+         self.maxwordSpin.setSuffix(' %s' %self.trans_prop['maxwordSpin']['suffix']['singular'])
       else:
-         self.maxwordSpin.setSuffix(' words')
+         self.maxwordSpin.setSuffix(' %s' %self.trans_prop['maxwordSpin']['suffix']['plural'])
+      
       self.minwordSpin.setMaximum(value)
       return
 
