@@ -128,9 +128,15 @@ class App(QMainWindow):
       ###############################################
 
       self.shortcuts           = {}
-      self.shortcuts['Ctrl+O'] = QShortcut(QKeySequence('Ctrl+O'), self.win)
+      self.shortcuts['Ctrl+O'] = QShortcut(QKeySequence('Ctrl+O'), self.tabSettings)
       self.shortcuts['Ctrl+O'].activated.connect(self.loadCorpus)
+      
+      self.shortcuts['Ctrl+R'] = QShortcut(QKeySequence('Ctrl+R'), self.tabMain)
+      self.shortcuts['Ctrl+R'].activated.connect(self.newSentence)
 
+      self.shortcuts['Ctrl+P'] = QShortcut(QKeySequence('Ctrl+P'), self.tabMain)
+      self.shortcuts['Ctrl+P'].activated.connect(self.startGame)
+      
       # Show application
       self.win.resize(800, 800)
       self.win.show()
@@ -337,7 +343,7 @@ class App(QMainWindow):
       self.playButton.setEnabled(False)
       
       # Treeview with groups sentences
-      self.treeview        = QTreeView( )
+      self.treeview        = QTreeView()
       self.model           = QStandardItemModel(0, 3)
       self.treeview.setEditTriggers(QAbstractItemView.NoEditTriggers)
       self.treeview.setSelectionMode(QAbstractItemView.NoSelection)
@@ -350,6 +356,7 @@ class App(QMainWindow):
       self.guessEntry.isRedoAvailable = True
       self.guessEntry.isUndoAvailable = True
       self.guessEntry.textChanged.connect(self.guessEdited)
+      self.guessEntry.returnPressed.connect(self.validateGame)
       self.guessEntry.setEnabled(False)
       
       # Validate button
@@ -475,19 +482,19 @@ class App(QMainWindow):
       self.rulesVow_Vow_A.setChecked(True)
 
       self.rulesCon_Con_S  = QCheckBox('')
-      self.rulesCon_Con_S.stateChanged.connect(lambda value: self.setRule(Con_Con_S = value == 2, which='Modify_rule'))
+      self.rulesCon_Con_S.stateChanged.connect(lambda value: self.setRule(ContoCon_Single = value == 2, which='Modify_rule'))
       self.rulesCon_Con_S.setChecked(True)
 
       self.rulesCon_Con_A  = QCheckBox('')
-      self.rulesCon_Con_A.stateChanged.connect(lambda value: self.setRule(Con_Con_A = value == 2, which='Modify_rule'))
+      self.rulesCon_Con_A.stateChanged.connect(lambda value: self.setRule(ContoCon_All = value == 2, which='Modify_rule'))
       self.rulesCon_Con_A.setChecked(True)
 
       self.rulesLet_Let_S  = QCheckBox('')
-      self.rulesLet_Let_S.stateChanged.connect(lambda value: self.setRule(Let_Let_S = value == 2, which='Modify_rule'))
+      self.rulesLet_Let_S.stateChanged.connect(lambda value: self.setRule(LettoLet_Single = value == 2, which='Modify_rule'))
       self.rulesLet_Let_S.setChecked(True)
 
       self.rulesLet_Let_A  = QCheckBox('')
-      self.rulesLet_Let_A.stateChanged.connect(lambda value: self.setRule(Let_Let_A = value == 2, which='Modify_rule'))
+      self.rulesLet_Let_A.stateChanged.connect(lambda value: self.setRule(LettoLet_All = value == 2, which='Modify_rule'))
       self.rulesLet_Let_A.setChecked(True)
 
       self.rulesDel        = QCheckBox('')
@@ -644,13 +651,15 @@ class App(QMainWindow):
            
            # Pick a rule (we will remove the loop once we've included all the methods)
            rule     = random.choice(list(self.rules['Modify_rule'].keys()))
-           while rule not in ['VowtoVow_All', 'VowtoVow_Single']:
+           while rule not in ['VowtoVow_All', 'VowtoVow_Single', 'ContoCon_All', 'ContoCon_Single']:
                rule = random.choice(list(self.rules['Modify_rule'].keys()))
            
            # Loop through each group
            for group in groups:
                msg  = group.applyRule(rule)
                print(msg)
+               
+           
                
        # Add each group to the treeview
        for group in groups:
@@ -665,6 +674,9 @@ class App(QMainWindow):
        
        # Let the user give their answer
        self.guessEntry.setEnabled(True)
+       
+       # Place focus on the entry widget
+       self.guessEntry.setFocus()
        
        return
    
