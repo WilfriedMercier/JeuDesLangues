@@ -101,7 +101,7 @@ class App(QMainWindow):
       # Main tab widgets layout
       self.layoutMain.setAlignment(Qt.AlignTop)
       self.tabMain.setLayout(self.layoutMain)
-      self.tabs.addTab(self.tabMain, "&Game")
+      self.tabs.addTab(self.tabMain, "")
 
       # Game layout
       self._makeLayoutGame()
@@ -149,12 +149,10 @@ class App(QMainWindow):
       for t in self.translations:
           tbase         = opath.basename(t)
           action        = QAction('&%s' %tbase.split('.yaml')[0], self)
-          action.triggered.connect(lambda t: self.translate(tbase))
+          action.triggered.connect(lambda *args, x=tbase: self.translate(x))
           
           transmenu.addAction(action)
 
-      
-      
       # Show application
       self.setCentralWidget(self.win)
       self.resize(800, 800)
@@ -174,19 +172,18 @@ class App(QMainWindow):
                          'text'    : 'setText',
                          'title'   : 'setTitle',
                          'headers' : 'setHorizontalHeaderLabels',
-                         'suffix:' : 'setSuffix'
+                         'tabtext' : 'setTabText'
                         }
-            
       return
    
    
-   def applyTranslation(self, objName, methodName, value):
+   def applyTranslation(self, objName, methodName, values):
       '''
       Apply a translation to an object using the setMethods dict.
       
       :param str objName: oject name as appearing in the translation file
       :param str methodName: method name as appearing in the translation file
-      :param value: value to apply to the object
+      :param list values: values to apply to the object, they will be passed as *values
       
       :returns: 
          * 0 if everything is fine
@@ -207,7 +204,7 @@ class App(QMainWindow):
          return -2
       
       # Apply method
-      method(value)
+      method(*values)
       
       return 0
    
@@ -217,6 +214,32 @@ class App(QMainWindow):
       
       :param str newTransName: name of the new translation. If None or if similar to previous translation, no change is applied.
       '''
+      
+      def check(obj, method, val):
+         '''
+         Apply translation and check that nothing went wrong.
+
+         :param obj: object to apply the translation to
+         :param method: method used to apply the translation
+         :parm list val: list of parameters to pass to the method
+
+         :raises AttributeError:
+            * if the method could be found in object
+            * if the object could not be found
+         '''
+         
+         err = self.applyTranslation(obj, method, val)
+                  
+         # This error should never be raised in theory
+         if err == -2:
+            raise AttributeError('Method %s could not be found in object %s.' %(method, obj))
+            
+         # This means we are dealing with objects which are not attributes
+         elif err == -1:
+            raise AttributeError('Object %s could not be found.' %obj) 
+            
+         return
+      
       
       # Translation at startup
       if newTransName is None:
@@ -232,23 +255,31 @@ class App(QMainWindow):
                # Skip some methods if we do not need to apply them
                if obj in ['minwordSpin', 'maxwordSpin'] and method == 'suffix':
                   continue
+               
+               # Update tabs one by one
+               elif obj == 'tabs' and method == 'tabtext':
+                  method            = self.setMethods[method]
+                  
+                  for index, name in val.items():
+                     val            = [index, name]
+                     check(obj, method, val)
+                  continue
+               
+               # We must pass parameters as a list
+               if not isinstance(val, list):
+                  val               = [val]
                   
                method = self.setMethods[method]
-               err    = self.applyTranslation(obj, method, val)
+               check(obj, method, val)
                
-               # This error should never be raised in theory
-               if err == -2:
-                  raise AttributeError('Method %s could not be found in object %s.' %(method, obj))
-                  
-               # This means we are dealing with objects which are not attributes
-               elif err == -1:
-                  raise AttributeError('Object %s could not be found.' %obj)
                      
       # Translation if interface is already drawn with a language
       else:
          
+         transNameNoSuffix            = newTransName.split('.yaml')[0]
+         
          # If user picked the same translation, do nothing
-         if newTransName != self.currentTrans:
+         if transNameNoSuffix != self.currentTrans:
             
             # By default, we assume no translation file could be found
             ok                        = False
@@ -280,38 +311,43 @@ class App(QMainWindow):
                   # Update spinboxes using same value to update word according to the singular or plural form in use
                   if obj in ['minwordSpin', 'maxwordSpin'] and method == 'suffix':
                      if obj == 'minwordSpin':
-                        self._minimumWordsChanged(self.minwordSpin.value)
+                        self._minimumWordsChanged(self.minwordSpin.value())
                      else:
-                        self._maximumWordsChanged(self.maxwordSpin.value)
+                        self._maximumWordsChanged(self.maxwordSpin.value())
+                     continue
                         
                   # Update sentence box label
-                  if obj == 'senBox' and method == 'title':
+                  elif obj == 'senBox' and method == 'title':
                      
                      # Get old sentence
-                     sen = self.senBox.title
+                     val               = self.senBox.title()
                      
                      # Replace the sentence word
-                     sen.replace(self.old_trans_prop['title'], self.trans_prop['title'])
+                     val               = val.replace(self.old_trans_prop['senBox']['title'], self.trans_prop['senBox']['title'])
                      
                      # Replace the additional word part
-                     if self.old_trans_prop['word']['plural'] in sen:
-                        sen.replace(self.old_trans_prop['word']['plural'], self.trans_prop['word']['plural'])
-                     elif self.old_trans_prop['word']['singular'] in sen:
-                        sen.replace(self.old_trans_prop['word']['singular'], self.trans_prop['word']['singular'])
-                        
-                     val = sen
+                     if self.old_trans_prop['word']['plural'] in val:
+                        val            = val.replace(self.old_trans_prop['word']['plural'], self.trans_prop['word']['plural'])
+                     elif self.old_trans_prop['word']['singular'] in val:
+                        val            = val.replace(self.old_trans_prop['word']['singular'], self.trans_prop['word']['singular'])
                      
-                  method = self.setMethods[method]
-                  err    = self.applyTranslation(obj, method, val)
-                  
-                  # This error should never be raised in theory
-                  if err == -2:
-                     raise AttributeError('Method %s could not be found in object %s.' %(method, obj))
+                  # Update tabs one by one
+                  elif obj == 'tabs' and method == 'tabtext':
+                     method            = self.setMethods[method]
                      
-                  # This means we are dealing with objects which are not attributes
-                  elif err == -1:
-                     raise AttributeError('Object %s could not be found.' %obj) 
-      
+                     for index, name in val.items():
+                        val            = [index, name]
+                        check(obj, method, val)
+                     continue
+                     
+                  # We must pass parameters as a list
+                  if not isinstance(val, list):
+                     val               = [val]
+                     
+                  method               = self.setMethods[method]
+                  check(obj, method, val)
+                  self.currentTrans    = transNameNoSuffix
+   
       return
                
 
