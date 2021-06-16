@@ -136,13 +136,15 @@ def VowtoVow_All(sentence, language, vowels=None):
    Randomly modify a vowel into another one in all the occurences in the sentence.
 
    :param str sentence: sentence to modify the vowel from
-   :param dict language: dictionary describing the lnaguage used
+   :param dict language: dictionary describing the language used
 
    :param list vowels: list of vowels appearing in the sentence
 
    :returns: modified sentence, new vowels list, vowel removed, vowel added
    :rtype: str, list[str], str, str
    '''
+   
+   #print(vowels, sentence)
 
    if vowels is None:
       raise ValueError('A vowels list must be given.')
@@ -173,16 +175,30 @@ def VowtoVow_All(sentence, language, vowels=None):
 
    return sentence, vowels, vowel_out, vowel_in
 
-def VowtoVow_Single(sentence, language):
+def VowtoVow_Single(sentence, language, vowels_sen=None):
    '''
    Randomly modify a vowel into another one in a randomly chosen word.
 
    :param str sentence: sentence to modify the vowel from
-   :param dict language: dictionary describing the lnaguage used
+   :param dict language: dictionary describing the language used
+   
+   :param list vowels_sen: list of vowels appearing in the sentence
 
    :returns: modified sentence, picked word, new vowels list, vowel removed, vowel added
    :rtype: str, str, list[str], str, str
    '''
+   
+   # For debug purposes
+   tmp_sen = sentence
+   
+   #print(vowels_sen, sentence)
+   
+   if vowels_sen is None:
+      raise ValueError('A vowels list must be given.')
+      
+   # If no vowel found, do not go further
+   if len(vowels_sen) == 0:
+       return None, None, None, None, None
    
    # Split words from sentence
    words_all          = make_words(sentence)
@@ -196,10 +212,7 @@ def VowtoVow_Single(sentence, language):
        if len(vow) != 0:
            words.append(w)
            vowels_list.append(vow)
-           
-   # If no vowel found, do not go further
-   if len(words) == 0:
-       return None, None, None, None, None
+        
 
    ##################################
    #         Random choices         #
@@ -247,11 +260,141 @@ def VowtoVow_Single(sentence, language):
 
    # Remove the previous vowel from the vowel list if it disappeared from the sentence
    if vowel_out not in sentence:
-       vowels.remove(vowel_out)
+       vowels_sen.remove(vowel_out)
        
    # Add the new vowel into the vowel list if it was not already present
-   if vowel_in not in vowels:
-      vowels.append(vowel_in)
+   if vowel_in not in vowels_sen:
+      vowels_sen.append(vowel_in)
 
-   return sentence, word, vowels, vowel_out, vowel_in
+   return sentence, word, vowels_sen, vowel_out, vowel_in
+
+def ContoCon_All(sentence, language, consonants=None):
+   '''
+   Randomly modify a consonant into another one in all the occurences in the sentence.
+
+   :param str sentence: sentence to modify the consonant from
+   :param dict language: dictionary describing the language used
+
+   :param list consonants: list of consonants appearing in the sentence
+
+   :returns: modified sentence, new consonants list, consonant removed, consonant added
+   :rtype: str, list[str], str, str
+   '''
+
+   if consonants is None:
+      raise ValueError('A consonants list must be given.')
+      
+   # If no vowel found, do not go further
+   if len(consonants) == 0:
+       return None, None, None, None
+       
+   # Pick a vowel in the sentence
+   consonant_out     = random.choice(consonants)
+
+   # Pick a vowel to put in the sentence
+   consonant_in      = random.choice(language['consonants'])
+
+   # Replace the vowel
+   sentence          = sentence.replace(consonant_out, consonant_in)
+
+   consonants.remove(consonant_out)
+   if consonant_in not in consonants:
+      consonants.append(consonant_in)
+
+   # Take care of alternations
+   if consonant_out in language['map_alternate_inv']:
+      for alternation in language['map_alternate_inv'][consonant_out]:
+
+         if alternation in sentence:
+            sentence = sentence.replace(alternation, consonant_in)
+
+   return sentence, consonants, consonant_out, consonant_in
+
+def ContoCon_Single(sentence, language, consonants_sen=None):
+   '''
+   Randomly modify a vowel into another one in a randomly chosen word.
+
+   :param str sentence: sentence to modify the vowel from
+   :param dict language: dictionary describing the lnaguage used
+   
+   :param list consonants_sen: list of consonants appearing in the sentence
+
+   :returns: modified sentence, picked word, new consonants list, consonant removed, consonant added
+   :rtype: str, str, list[str], str, str
+   '''
+   
+   if consonants_sen is None:  
+      raise ValueError('A consonants list must be given.')
+      
+   # If no consonant found, do not go further
+   if len(consonants_sen) == 0:
+       return None, None, None, None, None
+   
+   # Split words from sentence
+   words_all          = make_words(sentence)
+   
+   # Only keep words which have consonants
+   words              = []
+   consonants_list    = []
+   for w in words_all:
+       
+       vow, con       = make_vowels_consonants(w, language)
+       if len(con) != 0:
+           words.append(w)
+           consonants_list.append(con)
+           
+
+   ##################################
+   #         Random choices         #
+   ##################################
+
+   # Pick a random word
+   pos                = random.choice(range(len(words)))
+   word               = words[pos]
+   consonants         = consonants_list[pos]
+
+   # Pick a consonant in the selected word
+   consonant_out      = random.choice(consonants)
+
+   # Pick a consonant to put in the sentence
+   consonant_in       = random.choice(language['consonants'])
+
+
+   ############################
+   #      Split sentence      #
+   ############################
+
+   # Split the sentence excluding some characters
+   sentence_split     = make_words(sentence)
+
+   # Split the sentence keeping characters such as , in words
+   sentence_rec       = sentence.split(' ')
+
+
+   ###########################################
+   #            Replace the vowel            #
+   ###########################################
+
+   for pos in range(len(sentence_split)):
+      if sentence_split[pos].lower() == word.lower():
+         sentence_rec[pos]          = sentence_rec[pos].replace(consonant_out, consonant_in)
+
+         # Take care of alternations
+         if consonant_out in language['map_alternate_inv']:
+            for alternation in language['map_alternate_inv'][consonant_out]:
+               if alternation in word:
+                  sentence_rec[pos] = sentence_rec[pos].replace(alternation, consonant_in)
+
+   # Reconstruct the sentence
+   sentence = ' '.join(sentence_rec)
+
+   # Remove the previous consonant from the consonant list if it disappeared from the sentence
+   if consonant_out not in sentence:
+       consonants_sen.remove(consonant_out)
+       
+   # Add the new consonant into the consonant list if it was not already present
+   if consonant_in not in consonants_sen:
+      consonants_sen.append(consonant_in)
+
+   return sentence, word, consonants_sen, consonant_out, consonant_in
 

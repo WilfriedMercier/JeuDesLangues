@@ -5,6 +5,7 @@ import yaml
 import os.path           as     opath
 from   functools         import reduce
 from   glob              import glob
+from   copy              import deepcopy
 from   PyQt5.QtGui       import QIcon, QPixmap
 
 # Custom imports
@@ -31,15 +32,17 @@ class LanguageGroup:
         self.sentence    = [sentence]
         
         # Vowels and consonants in the sentence
-        self.consonants  = consonants
-        self.vowels      = vowels
+        self.consonants  = deepcopy(consonants)
+        self.vowels      = deepcopy(vowels)
         
         # Language dict
-        self.language    = language
+        self.language    = deepcopy(language)
         
         # Rule methods
         self.ruleMethods = {'VowtoVow_All'    : self.VowtoVow_All,
-                            'VowtoVow_Single' : self.VowtoVow_Single
+                            'VowtoVow_Single' : self.VowtoVow_Single,
+                            'ContoCon_All'    : self.ContoCon_All,
+                            'ContoCon_Single' : self.ContoCon_Single
                            }
         
         
@@ -67,6 +70,7 @@ class LanguageGroup:
     #              Rules              #
     ###################################
     
+    # Vowels
     def VowtoVow_All(self, turn, *args, **kwargs):
         ''''
         Vowel to vowel on all words rule.
@@ -78,7 +82,7 @@ class LanguageGroup:
         '''
         
         # Transform sentence
-        out         = sen.VowtoVow_All(self.sentence[-1], self.language, vowels=self.vowels)
+        out             = sen.VowtoVow_All(self.sentence[-1], self.language, vowels=self.vowels)
         if None not in out:
 
             sentence    = out[0]
@@ -111,7 +115,7 @@ class LanguageGroup:
         '''
         
         # Transform sentence
-        out             = sen.VowtoVow_Single(self.sentence[-1], self.language)
+        out             = sen.VowtoVow_Single(self.sentence[-1], self.language, vowels_sen=self.vowels)
         if None not in out:
         
             sentence    = out[0]
@@ -121,9 +125,7 @@ class LanguageGroup:
             vowel_in    = out[4]
             
             # Update vowels
-            for vowel in vowels:
-                if vowel not in self.vowels:
-                    self.vowels.append(vowel)
+            self.vowels = vowels
             
             # Update sentence
             self.sentence.append(sentence)
@@ -133,6 +135,74 @@ class LanguageGroup:
         else:
             self.sentence.append(self.sentence[-1])
             msg         = 'Turn %s: %s made no modifications because no vowel was found in sentence.' %(turn, self.id)
+            
+        return msg
+    
+    # Consonants
+    def ContoCon_All(self, turn, *args, **kwargs):
+        ''''
+        Consonant to consonant on all words rule.
+        
+        :param str turn: name of the turn to put in the sentence dict
+        
+        :returns: output message for admin mode
+        :rtype: str
+        '''
+        
+        # Transform sentence
+        out                 = sen.ContoCon_All(self.sentence[-1], self.language, consonants=self.consonants)
+        if None not in out:
+
+            sentence        = out[0]
+            consonants      = out[1]
+            consonant_out   = out[2] 
+            consonant_in    = out[3]
+            
+            # Update vowels
+            self.consonants = consonants
+            
+            # Update sentence
+            self.sentence.append(sentence)
+            
+            # Message to output for admin mode
+            msg         = 'Turn %s: %s changed consonant %s to consonant %s in every word.' %(turn, self.id, consonant_out, consonant_in)
+        else:
+            self.sentence.append(self.sentence[-1])
+            msg         = 'Turn %s: %s made no modifications because no consonant was found in the sentence.' %(turn, self.id)
+        
+        return msg
+        
+    def ContoCon_Single(self, turn, *args, **kwargs):
+        ''''
+        Consonant to consonant on a single word rule.
+        
+        :param str turn: name of the turn to put in the sentence dict
+        
+        :returns: output message for admin mode
+        :rtype: str
+        '''
+        
+        # Transform sentence
+        out                 = sen.ContoCon_Single(self.sentence[-1], self.language, consonants_sen=self.consonants)
+        if None not in out:
+        
+            sentence        = out[0]
+            word            = out[1]
+            consonants      = out[2]
+            consonant_out   = out[3] 
+            consonant_in    = out[4]
+            
+            # Update vowels
+            self.consonants = consonants
+            
+            # Update sentence
+            self.sentence.append(sentence)
+        
+            # Message to output for admin mode
+            msg             = 'Turn %s: %s changed consonant %s to consonant %s in word %s.' %(turn, self.id, consonant_out, consonant_in, word)
+        else:
+            self.sentence.append(self.sentence[-1])
+            msg             = 'Turn %s: %s made no modifications because no consonant was found in sentence.' %(turn, self.id)
             
         return msg
 
