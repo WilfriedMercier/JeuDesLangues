@@ -1,5 +1,5 @@
 genSenButton:
-  tooltip: 'Click to randomly draw a new sentence form the corpus'
+  tooltip: 'Click to randomly draw a new sentence form the corpus (Ctrl+R)'
 senBox:
   title: 'Sentence'
 word:
@@ -10,7 +10,7 @@ senLabel:
 scoreBox:
   title: 'Score'
 playButton:
-  tooltip: 'Click to start the game'
+  tooltip: 'Click to start the game (Ctrl+P)'
 model:
   headers: !!python/tuple
     - 'Group'
