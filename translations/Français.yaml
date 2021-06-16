@@ -1,0 +1,82 @@
+tabs:
+  tabtext:
+    0: '&Jeu'
+    1: '&Configuration'
+genSenButton:
+  tooltip: 'Cliquez pour tirer aléatoirement une phrase du corpus (Ctrl+R)'
+senBox:
+  title: 'Phrase'
+word:
+  singular: 'mot'
+  plural: 'mots'
+senLabel:
+  tooltip: 'Ecrivez puis validez votre suggestion pour voir la phrase'
+scoreBox:
+  title: 'Score'
+playButton:
+  tooltip: 'Cliquez pour commencer le jeu (Ctrl+P)'
+model:
+  headers: !!python/tuple
+    - 'Groupe'
+    - 'Tour'
+    - 'Phrase'
+guessEntry:
+  tooltip: 'Ecrivez votre suggestion pour la phrase initiale'
+validateButton:
+  tooltip: 'Cliquez pour valider votre phrase'
+inputText:
+  text: 'Fichier corpus'
+inputEntry:
+  tooltip: 'Ecrivez un nom de fichier corpus afin de générer des phrases'
+inputButton:
+  tooltip: 'Cliquez pour selectionner un fichier corpus afin de générer des phrases'
+minwordText:
+  text: 'Nombre minimum de mots'
+minwordSpin:
+  tooltip: 'Les phrases seront tirées aléatoirement depuis un fichier corpus avec un nombre de mots entre le minimum et la maximum'
+  suffix:
+    singular: ' mot'
+    plural: ' mots'
+maxwordText:
+  text: 'Nombre maximum de mots'
+maxwordSpin:
+  tooltip: 'Les phrases seront tirées aléatoirement depuis un fichier corpus avec un nombre de mots entre le minimum et la maximum'
+  suffix:
+    singular: ' mot'
+    plural: ' mots'
+rulesBox:
+  title: 'Règles'
+rulesNbGrSpin:
+  tooltip: 'Chaque groupe représente une langue qui va évoluer de son côté au fil des tours'
+rulesNbGrText:
+  text: 'Nombre de groupes de langues'
+rulesTurnSpin:
+  tooltip: "Les groupes vont altérer leur phrase à chaque tour pour simuler l'évolution des langues"
+rulesTurnText:
+  text: 'Nombre de tours'
+rulesVow_Vow_S:
+  text: "Echange d'une voyelle dans un seul mot"
+  tooltip: 'Une voyelle est tirée au hasard et remplacée par une autre dans un seul mot'
+rulesVow_Vow_A:
+  text: "Echange d'une voyelle dans tous les mots"
+  tooltip: 'Une voyelle est tirée au hasard et remplacée par une autre dans tous les mots la contenant'
+rulesCon_Con_S:
+  text: "Echange d'une consonne dans un seul mot"
+  tooltip: 'Une consonne est tirée au hasard et remplacée par une autre dans un seul mot'
+rulesCon_Con_A:
+  text: "Echange d'une consonne dans tous les mots"
+  tooltip: 'Une consonne est tirée au hasard et remplacée par une autre dans tous les mots la contenant'
+rulesLet_Let_S:
+  text: "Echange d'une lettre dans un seul mot"
+  tooltip: 'Une lettre est tirée au hasard et remplacée par une autre dans un seul mot'
+rulesLet_Let_A:
+  text: "Echange d'une lettre dans tous les mots"
+  tooltip: 'Une lettre est tirée au hasard et remplacée par une autre dans tous les mots la contenant'
+rulesDel:
+  text: 'Suppression de lettre'
+  tooltip: "Une lettre est tirée au hasard et supprimée d'un seul mot"
+rulesSwap:
+  text: 'Echange de deux mots'
+  tooltip: 'Deux mots consécutifs sont tirés au hasard et interchangés dans la phrase'
+selectCorpus:
+  caption: 'Choisir un fichier corpus...'
