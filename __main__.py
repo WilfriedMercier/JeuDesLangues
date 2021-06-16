@@ -8,7 +8,7 @@ import random
 import os
 import os.path           as     opath
 
-from   PyQt5.QtWidgets   import QMainWindow, QApplication, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView, QAbstractItemView
+from   PyQt5.QtWidgets   import QMainWindow, QApplication, QMenuBar, QAction, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView, QAbstractItemView
 from   PyQt5.QtCore      import Qt, pyqtSlot, QSize
 from   PyQt5.QtGui       import QKeySequence, QPalette, QColor, QStandardItemModel, QStandardItem
 
@@ -66,7 +66,7 @@ class App(QMainWindow):
 
       # Window
       self.win            = QWidget()
-      self.win.setWindowTitle('Jeu des langues (EBTP)')
+      self.setWindowTitle('Jeu des langues (EBTP)')
       self.layoutWin      = QGridLayout()
 
       # Tabs
@@ -137,9 +137,28 @@ class App(QMainWindow):
       self.shortcuts['Ctrl+P'] = QShortcut(QKeySequence('Ctrl+P'), self.tabMain)
       self.shortcuts['Ctrl+P'].activated.connect(self.startGame)
       
+
+      ############################
+      #           Menu           #
+      ############################
+   
+      menubar           = self.menuBar()
+      transmenu         = menubar.addMenu('&Interface')
+      
+      # Setup actions given the languages found
+      for t in self.translations:
+          tbase         = opath.basename(t)
+          action        = QAction('&%s' %tbase.split('.yaml')[0], self)
+          action.triggered.connect(lambda t: self.translate(tbase))
+          
+          transmenu.addAction(action)
+
+      
+      
       # Show application
-      self.win.resize(800, 800)
-      self.win.show()
+      self.setCentralWidget(self.win)
+      self.resize(800, 800)
+      self.show()
       self.centre()
       
       
@@ -881,10 +900,10 @@ class App(QMainWindow):
       frameGm     = self.frameGeometry()
       screen      = self.root.desktop().screenNumber(self.root.desktop().cursor().pos())
       centerPoint = self.root.desktop().screenGeometry(screen).center()
-      centerPoint.setY(centerPoint.y() - 100)
-      centerPoint.setX(centerPoint.x() - 100)
+      centerPoint.setY(centerPoint.y())
+      centerPoint.setX(centerPoint.x())
       frameGm.moveCenter(centerPoint)
-      self.win.move(frameGm.topLeft())
+      self.move(frameGm.topLeft())
 
       return
 
