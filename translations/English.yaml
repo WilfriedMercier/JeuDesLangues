@@ -1,5 +1,9 @@
+tabs:
+  tabtext:
+    0: '&Game'
+    1: '&Settings'
 genSenButton:
-  tooltip: 'Click to randomly draw a new sentence form the corpus (Ctrl+R)'
+  tooltip: 'Click to randomly draw a new sentence from the corpus (Ctrl+R)'
 senBox:
   title: 'Sentence'
 word:
@@ -25,7 +29,7 @@ inputText:
 inputEntry:
   tooltip: 'Enter a corpus file name to generate sentences from'
 inputButton:
-  tooltip: 'Select a corpus text file to generate sentences from'
+  tooltip: 'Click to select a corpus text file to generate sentences from'
 minwordText:
   text: 'Minimum number of words'
 minwordSpin:
