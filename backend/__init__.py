@@ -373,15 +373,13 @@ def setup(scriptPath, configFile):
 
       # Generate icons
       iconsPath                 = conf['iconDir']
-      formats                   = conf['formats']
-      icons, ok, msg            = loadIcons(scriptPath, iconsPath, formats=formats)
+      icons, ok, msg            = loadIcons(scriptPath, iconsPath)
 
       if not ok:
          return {}, ok, msg
 
       # Remove old icons keys and place loaded icons instead in conf dict
       conf.pop('iconDir')
-      conf.pop('formats')
       conf['icons']             = icons
 
       # Load default corpus file if not empty
