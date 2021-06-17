@@ -80,3 +80,5 @@ rulesSwap:
   tooltip: 'Two consecutive words will be randomly selected and interchanged in the sentence'
 selectCorpus:
   caption: 'Load a corpus file...'
+saveButton:
+  tooltip: 'Click to save current settings'

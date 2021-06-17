@@ -80,3 +80,5 @@ rulesSwap:
   tooltip: 'Deux mots consécutifs sont tirés au hasard et interchangés dans la phrase'
 selectCorpus:
   caption: 'Choisir un fichier corpus...'
+saveButton:
+  tooltip: 'Cliquez pour enregistrer les paramètres actuels'
