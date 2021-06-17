@@ -559,6 +559,13 @@ class App(QMainWindow):
       self.rulesSwap       = QCheckBox('')
       self.rulesSwap.stateChanged.connect(lambda value: self.setRule(Swap = value == 2, which='Modify_rule'))
       self.rulesSwap.setChecked(True)
+      
+      # Fourth line save button
+      self.saveButton       = QPushButton('')
+      self.saveButton.setFlat(True)
+      self.saveButton.setIcon(self.icons['SAVE'])
+      self.saveButton.setIconSize(QSize(24, 24))
+      self.saveButton.clicked.connect(self.saveSettings)
 
 
       #################################
@@ -603,10 +610,20 @@ class App(QMainWindow):
       self.layoutRules.setColumnStretch(1, 1)
       self.layoutRules.setColumnStretch(2, 12)
       self.rulesBox.setLayout(self.layoutRules)
+      
+      # Setting save button layout
+      self.layoutSettings.addWidget(self.saveButton, 6, 3)
 
       # Setting tab layout
       self.layoutSettings.setColumnStretch(1, 1)
       self.layoutSettings.setColumnStretch(2, 1)
+      
+      for i in range(1, 7):
+         if i == 5:
+            self.layoutSettings.setRowStretch(i, 30)
+         else:
+            self.layoutSettings.setRowStretch(i, 1)
+            
       self.layoutSettings.setAlignment(Qt.AlignTop)
       self.tabSettings.setLayout(self.layoutSettings)
       self.tabs.addTab(self.tabSettings, "&Settings")
@@ -966,6 +983,12 @@ class App(QMainWindow):
        else:
            self.validateButton.setEnabled(False)
            
+       return
+    
+   def saveSettings(self, *args, **kwargs):
+       '''Actions taken when settings are saved.'''
+       
+       print('save')
        return
    
    def setBadText(self, text, *args, **kwargs):
