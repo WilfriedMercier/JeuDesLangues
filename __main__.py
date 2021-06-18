@@ -121,6 +121,11 @@ class App(QMainWindow):
       self._setupTranslation()
       self.translate(None)
       self.currentTrans        = translation
+      
+      # Set treview section properties
+      self.treeview.header().setDefaultAlignment(Qt.AlignHCenter)
+      self.treeview.header().resizeSection(0, 100)
+      self.treeview.header().resizeSection(1, 50)
 
 
       ###############################################
@@ -400,9 +405,13 @@ class App(QMainWindow):
       # Treeview with groups sentences
       self.treeview        = QTreeView()
       self.model           = QStandardItemModel(0, 3)
+      self.treeview.setAnimated(True)
+      self.treeview.setItemsExpandable(True)
+      self.treeview.setExpandsOnDoubleClick(True)
       self.treeview.setEditTriggers(QAbstractItemView.NoEditTriggers)
       self.treeview.setSelectionMode(QAbstractItemView.NoSelection)
       self.treeview.setModel(self.model)
+      self.treeview.header().setStretchLastSection(True)
       
       # User guess line
       self.guessEntry      = QLineEdit('')
@@ -649,8 +658,13 @@ class App(QMainWindow):
        
        # Define Items
        name     = QStandardItem(name)
+       name.setTextAlignment(Qt.AlignHCenter)
+       
        turn     = QStandardItem('%d' %turn)
+       turn.setTextAlignment(Qt.AlignHCenter)
+       
        sentence = QStandardItem(sentence)
+       
        item     = (name, turn, sentence)
        
        # Append line to the treeview
