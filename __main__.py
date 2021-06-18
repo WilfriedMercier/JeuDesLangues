@@ -29,16 +29,15 @@ class App(QMainWindow):
       #        Initial setup        #
       ###############################
 
-      self.rules          = {'Modify_rule' : {},
-                             'Other_rule'  : {}
-                            }
-
       # Script current dir
       self.scriptDir      = opath.dirname(opath.realpath(__file__))
       conf, ok, msg       = bkd.setup(self.scriptDir, 'configuration.yaml')
 
       if not ok:
          raise IOError(msg)
+         
+      # Rules
+      self.rules          = conf['rules']
 
       # Corpus
       self.corpusDir      = conf['corpusDir']
@@ -108,6 +107,21 @@ class App(QMainWindow):
 
       # Settings layout
       self._makeLayoutSettings()
+      
+      # Setup settings widgets state
+      self._setupSettings()
+      
+      # Connect widgets to setting rules
+      self.rulesNbGrSpin.valueChanged.connect( lambda value: self.setRule(nbPlayers = value,            which='Other_rule'))
+      self.rulesTurnSpin.valueChanged.connect( lambda value: self.setRule(nbTurns = value,              which='Other_rule'))
+      self.rulesVow_Vow_S.stateChanged.connect(lambda value: self.setRule(VowtoVow_Single = value == 2, which='Modify_rule'))
+      self.rulesVow_Vow_A.stateChanged.connect(lambda value: self.setRule(VowtoVow_All = value == 2,    which='Modify_rule'))
+      self.rulesCon_Con_S.stateChanged.connect(lambda value: self.setRule(ContoCon_Single = value == 2, which='Modify_rule'))
+      self.rulesCon_Con_A.stateChanged.connect(lambda value: self.setRule(ContoCon_All = value == 2,    which='Modify_rule'))
+      self.rulesLet_Let_S.stateChanged.connect(lambda value: self.setRule(LettoLet_Single = value == 2, which='Modify_rule'))
+      self.rulesLet_Let_A.stateChanged.connect(lambda value: self.setRule(LettoLet_All = value == 2,    which='Modify_rule'))
+      self.rulesDel.stateChanged.connect(      lambda value: self.setRule(Delete = value == 2,          which='Modify_rule'))
+      self.rulesSwap.stateChanged.connect(     lambda value: self.setRule(Swap = value == 2,            which='Modify_rule'))
 
       # Main window layout
       self.layoutWin.addWidget(self.tabs, 1, 1)
@@ -479,11 +493,11 @@ class App(QMainWindow):
       #####################
 
       # Top line input text
-      self.inputText      = QLabel('')
+      self.inputText     = QLabel('')
       self.inputText.setAlignment(Qt.AlignTop)
 
       # Top line input entry
-      self.inputEntry = QLineEdit(self.corpusName)
+      self.inputEntry    = QLineEdit(self.corpusName)
       self.inputEntry.setAlignment(Qt.AlignTop)
       self.inputEntry.setClearButtonEnabled(True)
       self.inputEntry.isRedoAvailable = True
@@ -492,26 +506,26 @@ class App(QMainWindow):
       self.inputEntry.textEdited.connect(self.checkAndLoadCorpus)
 
       # Top line input button
-      self.inputButton = QPushButton('')
+      self.inputButton    = QPushButton('')
       self.inputButton.setIcon(self.icons['FOLDER'])
       self.inputButton.setFlat(True)
       self.inputButton.clicked.connect(self.loadCorpus)
 
       # Second line minimum words text
-      self.minwordText = QLabel('')
+      self.minwordText    = QLabel('')
       self.minwordText.setAlignment(Qt.AlignTop)
 
       # Second line minimum words spinbox
-      self.minwordSpin = QSpinBox()
+      self.minwordSpin    = QSpinBox()
       self.minwordSpin.setMinimum(1)
       self.minwordSpin.setMaximum(10)
 
       # Second line maximum words text
-      self.maxwordText   = QLabel('')
+      self.maxwordText    = QLabel('')
       self.maxwordText.setAlignment(Qt.AlignTop)
 
       # Second line maximum words spinbox
-      self.maxwordSpin   = QSpinBox()
+      self.maxwordSpin    = QSpinBox()
       self.maxwordSpin.setMinimum(3)
       
       self.minwordSpin.valueChanged.connect(self._minimumWordsChanged)
@@ -520,57 +534,29 @@ class App(QMainWindow):
       self.maxwordSpin.setValue(10)
       
       # Third line group box
-      self.rulesBox      = QGroupBox('')
-      self.layoutRules   = QGridLayout()
+      self.rulesBox       = QGroupBox('')
+      self.layoutRules    = QGridLayout()
 
-      self.rulesNbGrSpin = QSpinBox()
-      self.rulesNbGrSpin.valueChanged.connect(lambda value: self.setRule(nbPlayers = value, which='Other_rule'))
-      self.rulesNbGrSpin.setValue(5)
+      self.rulesNbGrSpin  = QSpinBox()
       self.rulesNbGrSpin.setMinimum(1)
       
-      self.rulesNbGrText = QLabel('')
+      self.rulesNbGrText  = QLabel('')
 
-      self.rulesTurnSpin = QSpinBox()
-      self.rulesTurnSpin.valueChanged.connect(lambda value: self.setRule(nbTurns = value, which='Other_rule'))
-      self.rulesTurnSpin.setValue(6)
+      self.rulesTurnSpin  = QSpinBox()
       self.rulesTurnSpin.setMinimum(1)
       
-      self.rulesTurnText = QLabel('')
-
+      self.rulesTurnText  = QLabel('')
       self.rulesVow_Vow_S = QCheckBox('')
-      self.rulesVow_Vow_S.stateChanged.connect(lambda value: self.setRule(VowtoVow_Single = value == 2, which='Modify_rule'))
-      self.rulesVow_Vow_S.setChecked(True)
-
       self.rulesVow_Vow_A = QCheckBox('')
-      self.rulesVow_Vow_A.stateChanged.connect(lambda value: self.setRule(VowtoVow_All = value == 2, which='Modify_rule'))
-      self.rulesVow_Vow_A.setChecked(True)
-
-      self.rulesCon_Con_S  = QCheckBox('')
-      self.rulesCon_Con_S.stateChanged.connect(lambda value: self.setRule(ContoCon_Single = value == 2, which='Modify_rule'))
-      self.rulesCon_Con_S.setChecked(True)
-
-      self.rulesCon_Con_A  = QCheckBox('')
-      self.rulesCon_Con_A.stateChanged.connect(lambda value: self.setRule(ContoCon_All = value == 2, which='Modify_rule'))
-      self.rulesCon_Con_A.setChecked(True)
-
-      self.rulesLet_Let_S  = QCheckBox('')
-      self.rulesLet_Let_S.stateChanged.connect(lambda value: self.setRule(LettoLet_Single = value == 2, which='Modify_rule'))
-      self.rulesLet_Let_S.setChecked(True)
-
-      self.rulesLet_Let_A  = QCheckBox('')
-      self.rulesLet_Let_A.stateChanged.connect(lambda value: self.setRule(LettoLet_All = value == 2, which='Modify_rule'))
-      self.rulesLet_Let_A.setChecked(True)
-
-      self.rulesDel        = QCheckBox('')
-      self.rulesDel.stateChanged.connect(lambda value: self.setRule(Delete = value == 2, which='Modify_rule'))
-      self.rulesDel.setChecked(True)
-
-      self.rulesSwap       = QCheckBox('')
-      self.rulesSwap.stateChanged.connect(lambda value: self.setRule(Swap = value == 2, which='Modify_rule'))
-      self.rulesSwap.setChecked(True)
+      self.rulesCon_Con_S = QCheckBox('')
+      self.rulesCon_Con_A = QCheckBox('')
+      self.rulesLet_Let_S = QCheckBox('')
+      self.rulesLet_Let_A = QCheckBox('')
+      self.rulesDel       = QCheckBox('')
+      self.rulesSwap      = QCheckBox('')
       
       # Fourth line save button
-      self.saveButton       = QPushButton('')
+      self.saveButton      = QPushButton('')
       self.saveButton.setFlat(True)
       self.saveButton.setIcon(self.icons['SAVE'])
       self.saveButton.setIconSize(QSize(24, 24))
@@ -1041,6 +1027,34 @@ class App(QMainWindow):
        
        return '<font color="%s">%s</font>' %(self.okColorName, text)
 
+
+   ############################################################
+   #            Settings and rules related methods            #
+   ############################################################
+   
+   def _setupSettings(self, *args, **kwargs):
+      '''Setup the settings at startup.'''
+      
+      for which, values in self.rules.items():
+         for setting, value in values.items():
+            obj    = value['widget']
+            method = value['method']
+            val    = value['value']
+            
+            ret    = self.setSetting(obj, method, val)
+            
+            if ret == -1:
+               raise AttributeError('Object %s not found.' %objName)
+            elif ret == -2:
+               raise AttributeError('Method %s in object %s not found.' %(method, objName))
+               
+            # Modify rules to be correctly by methods later on
+            self.rules[which][setting] = val
+            
+      print(self.rules)
+      return
+               
+
    def setRule(self, which=None, **kwargs):
       '''
       Set a rule with the given value. Function should be called as follows
@@ -1055,6 +1069,39 @@ class App(QMainWindow):
           self.rules[which][item] = value
 
       return
+   
+   def setSetting(self, objName, methodName, value):
+      '''
+      Set settings widget with the given value.
+
+      :param objName: object to update
+      :param methodName: method to apply to the object
+      :param value: value to put into the object
+      '''
+      
+      # Get object and method
+      try:
+         obj      = getattr(self, objName)
+      except AttributeError:
+         return -1
+      
+      try:
+         method   = getattr(obj, methodName)
+      except AttributeError:
+         return -2
+      
+      if objName in ['rulesVow_Vow_S', 'rulesVow_Vow_A', 'rulesCon_Con_S', 'rulesCon_Con_A', 'rulesLet_Let_S', 'rules_Let_Let_A', 'rulesDel', 'rulesSwap']:
+         if value:
+            value = Qt.Checked
+         else:
+            value = Qt.Unchecked
+      
+      # Apply method
+      print(objName, methodName, value)
+      method(value)
+      
+      return 0
+      
 
 
 if __name__ == '__main__':
