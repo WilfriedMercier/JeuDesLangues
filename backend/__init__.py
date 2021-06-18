@@ -208,39 +208,38 @@ class LanguageGroup:
 
 
 
-def loadCorpus(scriptPath, corpusPath, corpusFile):
+def loadCorpus(scriptPath, corpusFile):
    '''
    Load a corpus file.
 
    :param str scriptPath: path where the main program is located
-   :param str corpusPath: path of the corpus files directory **relative to scriptPath**
    :param str corpusFile: name of the corpus ascii file
 
    :returns: corpus text, ok flag and error message if any
    :rtype: str, boolean, str
    '''
 
-   file       = opath.join(scriptPath, corpusPath, corpusFile)
+   path       = opath.join(scriptPath, 'corpus')
+   file       = opath.join(path, corpusFile)
 
    if not opath.isfile(file):
-      return '', False, 'No corpus file %s found in %s directory.' %(corpusFile, opath.join(scriptPath, corpusPath))
+      return '', False, 'No corpus file %s found in %s directory.' %(corpusFile, path)
    else:
       with open(file, 'r') as f:
          text = f.read()
          return text, True, ''
 
-def loadIcons(scriptPath, iconsPath, formats=['xbm', 'xpm', 'png', 'bmp', 'gif', 'jpg', 'jpeg', 'pbm', 'pgm', 'ppm']):
+def loadIcons(scriptPath, formats=['xbm', 'xpm', 'png', 'bmp', 'gif', 'jpg', 'jpeg', 'pbm', 'pgm', 'ppm']):
    '''
    Load icons appearing in the given icon directory as QIcons objects.
 
    :param str scriptPath: path where the main program is located
-   :param str iconsPath: path where the icons are searched for **relative to scriptPath**
 
    :returns: icons dictionary, True if everything is ok or False otherwise, error message if any
    :rtype: dict[QIcons], bool, str
    '''
 
-   path             = opath.join(scriptPath, iconsPath)
+   path             = opath.join(scriptPath, 'icons')
    conf             = {}
 
    if opath.isdir(path):
@@ -264,12 +263,11 @@ def loadIcons(scriptPath, iconsPath, formats=['xbm', 'xpm', 'png', 'bmp', 'gif',
 
    return conf, ok, msg
 
-def loadLanguage(scriptPath, languagePath, languageFile, alt=True):
+def loadLanguage(scriptPath, languageFile, alt=True):
    '''
    Load and setup language properties.
 
    :param str scriptPath: path where the main program is located
-   :param str languagePath: path where the language file is located **relative to scriptPath**
    :param str languageFile: language configuration file. It must be of YAML type.
 
    :param bool alt: (**Optional**) whether to consider alterate forms as independent letters or not
@@ -278,7 +276,8 @@ def loadLanguage(scriptPath, languagePath, languageFile, alt=True):
    :rtype: dict, bool, str
    '''
 
-   file       = opath.join(scriptPath, languagePath, languageFile)
+   path       = opath.join(scriptPath, 'languages')
+   file       = opath.join(path, languageFile)
 
    if opath.isfile(file):
       with open(file, 'r') as f:
@@ -344,6 +343,27 @@ def loadTranslation(scriptPath, transFile, transPath='translations'):
         msg                = 'Translation file %s could not be fonud.' %file
     
     return conf, ok, msg
+ 
+def saveConfig(file, corpus=None, interface=None, language=None, alterations=None, rules=None):
+   '''Save settings into configuration file.'''
+   
+   if None in [corpus, interface, language, alterations, rules]:
+      raise ValueError('One of the variables in saveConfig is None.')
+   
+   # Build out dict and yaml string
+   out_d = {'corpus'              : corpus,
+            'interfaceLanguage'   : interface + '.yaml',
+            'language'            : language,
+            'languageAlterations' : alterations,
+            'rules'               : rules
+           }
+   
+   out   = yaml.dump(out_d, Dumper=yaml.Dumper)
+   
+   with open(file, 'w') as f:
+      f.write(out)
+   
+   return
 
 def setupTranslation(file):
     '''Utility function to easily change translation. See loadTranslation.'''
@@ -352,6 +372,11 @@ def setupTranslation(file):
         trans = yaml.load(f, Loader=yaml.Loader)
     
     return trans
+
+
+###################################
+#          INITIAL SETUP          #
+###################################
 
 def setup(scriptPath, configFile):
    '''
@@ -372,35 +397,26 @@ def setup(scriptPath, configFile):
          conf                   = yaml.load(f, Loader=yaml.Loader)
 
       # Generate icons
-      iconsPath                 = conf['iconDir']
-      icons, ok, msg            = loadIcons(scriptPath, iconsPath)
+      icons, ok, msg            = loadIcons(scriptPath)
 
       if not ok:
          return {}, ok, msg
 
-      # Remove old icons keys and place loaded icons instead in conf dict
-      conf.pop('iconDir')
       conf['icons']             = icons
 
       # Load default corpus file if not empty
-      corpusPath                = conf['corpusDir']
       corpusFile                = conf['corpus']
-      text, ok, msg             = loadCorpus(scriptPath, corpusPath, corpusFile)
+      text, ok, msg             = loadCorpus(scriptPath, corpusFile)
 
       if not ok:
          return {}, ok, msg
 
-      # Place corpus text and full directory in conf dict
-      conf['corpusDir']         = opath.join(scriptPath, corpusPath)
       conf['corpusText']        = text
 
       # Build default language dict
-      languagePath              = reduce(lambda x,y: opath.join(x, y), conf['languageDir'])
       languageFile              = conf['language']
-
       alterations               = conf['languageAlterations']
-
-      language, ok, msg         = loadLanguage(scriptPath, languagePath, languageFile, alt=alterations)
+      language, ok, msg         = loadLanguage(scriptPath, languageFile, alt=alterations)
 
       if not ok:
          return {}, ok, msg

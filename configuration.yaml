@@ -1,10 +1,5 @@
-iconDir: 'icons'
-corpusDir: 'corpus'
 corpus: 'corpus_balzac.txt'
 interfaceLanguage: 'Français.yaml'
-languageDir: 
-- 'backend'
-- 'languages'
 language: 'French.yaml'
 languageAlterations: False
 rules:

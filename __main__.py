@@ -1,5 +1,6 @@
 # Mercier Wilfried - IRAP
 
+import copy
 import sys
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -40,7 +41,6 @@ class App(QMainWindow):
       self.rules          = conf['rules']
 
       # Corpus
-      self.corpusDir      = conf['corpusDir']
       self.corpusName     = conf['corpus']
       self.corpusText     = snt.make_sentences(conf['corpusText'])
 
@@ -48,7 +48,13 @@ class App(QMainWindow):
       self.icons          = conf['icons']
 
       # Language properties
-      self.language       = {'vowels' : conf['vowels'], 'consonants' : conf['consonants'], 'map_alternate' : conf['map_alternate'], 'map_alternate_inv' : conf['map_alternate_inv']}
+      self.languageName   = conf['language']
+      self.langAlteration = conf['languageAlterations']
+      self.language       = {'vowels'            : conf['vowels'], 
+                             'consonants'        : conf['consonants'], 
+                             'map_alternate'     : conf['map_alternate'], 
+                             'map_alternate_inv' : conf['map_alternate_inv']
+                            }
 
       # Sentence to be modified by the game
       self.sentence       = ''
@@ -110,6 +116,9 @@ class App(QMainWindow):
       
       # Setup settings widgets state
       self._setupSettings()
+      
+      # Grey out save button
+      self.saveButton.setEnabled(False)
       
       # Connect widgets to setting rules
       self.rulesNbGrSpin.valueChanged.connect( lambda value: self.setRule(nbPlayers = value,            which='Other_rule'))
@@ -984,12 +993,6 @@ class App(QMainWindow):
            self.validateButton.setEnabled(False)
            
        return
-    
-   def saveSettings(self, *args, **kwargs):
-       '''Actions taken when settings are saved.'''
-       
-       print('save')
-       return
    
    def setBadText(self, text, *args, **kwargs):
        '''
@@ -1037,23 +1040,47 @@ class App(QMainWindow):
       
       for which, values in self.rules.items():
          for setting, value in values.items():
-            obj    = value['widget']
-            method = value['method']
-            val    = value['value']
+            obj       = value['widget']
+            method    = value['method']
+            val       = value['value']
             
-            ret    = self.setSetting(obj, method, val)
+            ret       = self.setSetting(obj, method, val)
             
             if ret == -1:
                raise AttributeError('Object %s not found.' %objName)
             elif ret == -2:
                raise AttributeError('Method %s in object %s not found.' %(method, objName))
                
-            # Modify rules to be correctly by methods later on
+      # Modify rules to be correctly by methods later on (rules layout from conf file is saved in another variable)
+      self._confRules = copy.deepcopy(self.rules)
+      for which, values in self.rules.items():
+         for setting, value in values.items():
             self.rules[which][setting] = val
             
       print(self.rules)
       return
-               
+   
+   def saveSettings(self, *args, **kwargs):
+       '''Actions taken when settings are saved.'''
+       
+       # Gather data necessary to save settings
+       corpus      = self.corpusName
+       interface   = self.currentTrans
+       language    = self.languageName
+       alterations = self.langAlteration
+       rules       = self._confRules
+       
+       # Need to update the rules according to the state of each rule in self.rules dict
+       print(self.rules)
+       for which, values in self.rules.items():
+          for item, value in values.items():
+             rules[which][item]['value'] = value
+       
+       bkd.saveConfig('test.yaml', corpus=corpus, interface=interface, language=language, alterations=alterations, rules=rules)
+          
+       # Grey out save icon
+       self.saveButton.setEnabled(False)
+       return
 
    def setRule(self, which=None, **kwargs):
       '''
@@ -1067,6 +1094,9 @@ class App(QMainWindow):
         
       for item, value in kwargs.items():
           self.rules[which][item] = value
+          
+      # When setting is updated we ungrey the save button
+      self.saveButton.setEnabled(True)
 
       return
    
