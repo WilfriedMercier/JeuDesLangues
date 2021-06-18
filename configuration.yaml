@@ -7,3 +7,46 @@ languageDir:
 - 'languages'
 language: 'French.yaml'
 languageAlterations: False
+rules:
+  Other_rule:
+    nbPlayers: 
+      widget: rulesNbGrSpin
+      method: setValue
+      value: 4
+    nbTurns: 
+      widget: rulesTurnSpin
+      method: setValue
+      value: 5
+  Modify_rule:
+    VowtoVow_Single: 
+      widget: rulesVow_Vow_S
+      method: setCheckState
+      value: True
+    VowtoVow_All: 
+      widget: rulesVow_Vow_A
+      method: setCheckState
+      value: True
+    ContoCon_Single: 
+      widget: rulesCon_Con_S
+      method: setCheckState
+      value: True
+    ContoCon_All: 
+      widget: rulesCon_Con_A
+      method: setCheckState
+      value: True
+    LettoLet_Single: 
+      widget: rulesLet_Let_S
+      method: setCheckState
+      value: False
+    LettoLet_All: 
+      widget: rulesLet_Let_A
+      method: setCheckState
+      value: False
+    Delete: 
+      widget: rulesDel
+      method: setCheckState
+      value: False
+    Swap: 
+      widget: rulesSwap
+      method: setCheckState
+      value: False
