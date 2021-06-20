@@ -1,191 +1,249 @@
 # Mercier Wilfried - IRAP
 
+import time
 import copy
 import sys
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-
+   
 import random
 import os
-import os.path           as     opath
+import os.path               as     opath
 
-from   PyQt5.QtWidgets   import QMainWindow, QApplication, QMenuBar, QAction, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView, QAbstractItemView
-from   PyQt5.QtCore      import Qt, pyqtSlot, QSize
-from   PyQt5.QtGui       import QKeySequence, QPalette, QColor, QStandardItemModel, QStandardItem
+from   PyQt5.QtWidgets       import QMainWindow, QApplication, QMenuBar, QAction, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QVBoxLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView, QAbstractItemView, QStatusBar, QSplashScreen
+from   PyQt5.QtCore          import Qt, pyqtSlot, QSize, QEventLoop
+from   PyQt5.QtGui           import QKeySequence, QPalette, QColor, QStandardItemModel, QStandardItem, QFont, QPixmap
 
 # Custom backend functions
-import backend           as     bkd
-import backend.sentences as     snt
+import backend               as     bkd
+import backend.sentences     as     snt
+import widgets.loadingScreen as     wload
 
 class App(QMainWindow):
    '''Main application.'''
 
    def __init__(self, root, iconsPath='icons', *args, **kwargs):
       '''Initialise the application.'''
-
-      self.root           = root
+      
+      self.root               = root
       super().__init__()
-
-      ###############################
-      #        Initial setup        #
-      ###############################
-
-      # Script current dir
-      self.scriptDir      = opath.dirname(opath.realpath(__file__))
-      conf, ok, msg       = bkd.setup(self.scriptDir, 'configuration.yaml')
-
-      if not ok:
-         raise IOError(msg)
-         
-      # Rules
-      self.rules          = conf['rules']
-
-      # Corpus
-      self.corpusName     = conf['corpus']
-      self.corpusText     = snt.make_sentences(conf['corpusText'])
-
-      # Icons
-      self.icons          = conf['icons']
-
-      # Language properties
-      self.languageName   = conf['language']
-      self.langAlteration = conf['languageAlterations']
-      self.language       = {'vowels'            : conf['vowels'], 
-                             'consonants'        : conf['consonants'], 
-                             'map_alternate'     : conf['map_alternate'], 
-                             'map_alternate_inv' : conf['map_alternate_inv']
-                            }
-
-      # Sentence to be modified by the game
-      self.sentence       = ''
-      self.words          = []
-      self.vowels         = []
-      self.consonants     = []
-      
-      # Interface language
-      self.translations   = conf['translations']
-      translation         = conf['trans_name']
-      self.currentTrans   = None
-      self.trans_prop     = conf['trans_prop']
-      self.old_trans_prop = None
-
-      # Window
-      self.win            = QWidget()
       self.setWindowTitle('Jeu des langues (EBTP)')
-      self.layoutWin      = QGridLayout()
-
-      # Tabs
-      self.tabs           = QTabWidget()
-
-      self.tabMain        = QWidget()
-      self.layoutMain     = QGridLayout()
-
-      self.tabSettings    = QWidget()
-      self.layoutSettings = QGridLayout()
       
+      # Script current dir
+      self.scriptDir          = opath.dirname(opath.realpath(__file__))
 
-      ############################################
-      #           Common color palettes          #
-      ############################################
-
-      self.okPalette      = QPalette()
-      self.okColorName    = 'darkgreen'
-      green               = QColor(self.okColorName)
-      self.okPalette.setColor(QPalette.Text, green)
-
-      self.errorPalette   = QPalette()
-      self.errorColorName = 'firebrick'
-      red                 = QColor(self.errorColorName)
-      self.errorPalette.setColor(QPalette.Text, red)
-
-
-      ################################################
-      #                 Setup layout                 #
-      ################################################
-
-      # Main tab widgets layout
-      self.layoutMain.setAlignment(Qt.AlignTop)
-      self.tabMain.setLayout(self.layoutMain)
-      self.tabs.addTab(self.tabMain, "")
-
-      # Game layout
-      self._makeLayoutGame()
-
-      # Settings layout
-      self._makeLayoutSettings()
       
-      # Setup settings widgets state
-      self._setupSettings()
+      ###################################
+      #       Setup splash screen       #
+      ###################################
       
-      # Grey out save button
-      self.saveButton.setEnabled(False)
+      self.splash             = QSplashScreen(QPixmap(opath.join(self.scriptDir, 'background.png')))
+      self.splash.show()
+      self.splashlabel        = QLabel('Test')
+      self.splashlabel.setAlignment(Qt.AlignCenter)
+      self.splashlabel.setStyleSheet('''
+                                     font-size: 12px;
+                                     font: bold italic;
+                                    ''')
       
-      # Connect widgets to setting rules
-      self.rulesNbGrSpin.valueChanged.connect( lambda value: self.setRule(nbPlayers = value,            which='Other_rule'))
-      self.rulesTurnSpin.valueChanged.connect( lambda value: self.setRule(nbTurns = value,              which='Other_rule'))
-      self.rulesVow_Vow_S.stateChanged.connect(lambda value: self.setRule(VowtoVow_Single = value == 2, which='Modify_rule'))
-      self.rulesVow_Vow_A.stateChanged.connect(lambda value: self.setRule(VowtoVow_All = value == 2,    which='Modify_rule'))
-      self.rulesCon_Con_S.stateChanged.connect(lambda value: self.setRule(ContoCon_Single = value == 2, which='Modify_rule'))
-      self.rulesCon_Con_A.stateChanged.connect(lambda value: self.setRule(ContoCon_All = value == 2,    which='Modify_rule'))
-      self.rulesLet_Let_S.stateChanged.connect(lambda value: self.setRule(LettoLet_Single = value == 2, which='Modify_rule'))
-      self.rulesLet_Let_A.stateChanged.connect(lambda value: self.setRule(LettoLet_All = value == 2,    which='Modify_rule'))
-      self.rulesDel.stateChanged.connect(      lambda value: self.setRule(Delete = value == 2,          which='Modify_rule'))
-      self.rulesSwap.stateChanged.connect(     lambda value: self.setRule(Swap = value == 2,            which='Modify_rule'))
-
-      # Main window layout
-      self.layoutWin.addWidget(self.tabs, 1, 1)
-      self.win.setLayout(self.layoutWin)
-      
-      
-      #####################################################
-      #                 Apply translation                 #
-      #####################################################
-      
-      self._setupTranslation()
-      self.translate(None)
-      self.currentTrans        = translation
-      
-      # Set treview section properties
-      self.treeview.header().setDefaultAlignment(Qt.AlignHCenter)
-      self.treeview.header().resizeSection(0, 100)
-      self.treeview.header().resizeSection(1, 50)
-
-
-      ###############################################
-      #               Setup shortcuts               #
-      ###############################################
-
-      self.shortcuts           = {}
-      self.shortcuts['Ctrl+O'] = QShortcut(QKeySequence('Ctrl+O'), self.tabSettings)
-      self.shortcuts['Ctrl+O'].activated.connect(self.loadCorpus)
-      
-      self.shortcuts['Ctrl+R'] = QShortcut(QKeySequence('Ctrl+R'), self.tabMain)
-      self.shortcuts['Ctrl+R'].activated.connect(self.newSentence)
-
-      self.shortcuts['Ctrl+P'] = QShortcut(QKeySequence('Ctrl+P'), self.tabMain)
-      self.shortcuts['Ctrl+P'].activated.connect(self.startGame)
-      
-
-      ############################
-      #           Menu           #
-      ############################
+      self.splashlayout       = QVBoxLayout()
+      self.splashlayout.addSpacing(350)
+      self.splashlayout.addWidget(self.splashlabel)
+      self.splash.setLayout(self.splashlayout)
    
-      menubar           = self.menuBar()
-      transmenu         = menubar.addMenu('&Interface')
+      # Let enough time for the event loop to catch the opening of the background image
+      time.sleep(0.1)
+      self.root.processEvents()
       
-      # Setup actions given the languages found
-      for t in self.translations:
-          tbase         = opath.basename(t)
-          action        = QAction('&%s' %tbase.split('.yaml')[0], self)
-          action.triggered.connect(lambda *args, x=tbase: self.translate(x))
-          
-          transmenu.addAction(action)
+      try:
+   
+         ###############################
+         #        Initial setup        #
+         ###############################
+   
+         conf, ok, msg       = bkd.setup(self.scriptDir, 'configuration.yaml', parent=self)
+   
+         if not ok:
+            raise IOError(msg)
+            
+         # Rules
+         self.rules          = conf['rules']
+   
+         # Corpus
+         self.corpusName     = conf['corpus']
+         self.corpusText     = snt.make_sentences(conf['corpusText'])
+   
+         # Icons
+         self.icons          = conf['icons']
+   
+         # Language properties
+         self.languageName   = conf['language']
+         self.langAlteration = conf['languageAlterations']
+         self.language       = {'vowels'            : conf['vowels'], 
+                                'consonants'        : conf['consonants'], 
+                                'map_alternate'     : conf['map_alternate'], 
+                                'map_alternate_inv' : conf['map_alternate_inv']
+                               }
+   
+         # Sentence to be modified by the game
+         self.sentence       = ''
+         self.words          = []
+         self.vowels         = []
+         self.consonants     = []
+         
+         # Interface language
+         self.translations   = conf['translations']
+         translation         = conf['trans_name']
+         self.currentTrans   = None
+         self.trans_prop     = conf['trans_prop']
+         self.old_trans_prop = None
+   
+         self.splashlabel.setText('Setting interface...')
+         self.root.processEvents()
+   
+         # Window
+         self.win            = QWidget()
+         self.layoutWin      = QGridLayout()
+   
+         # Tabs
+         self.tabs           = QTabWidget()
+   
+         self.tabMain        = QWidget()
+         self.layoutMain     = QGridLayout()
+   
+         self.tabSettings    = QWidget()
+         self.layoutSettings = QGridLayout()
+         
+   
+         ############################################
+         #           Common color palettes          #
+         ############################################
+   
+         self.okPalette      = QPalette()
+         self.okColorName    = 'darkgreen'
+         green               = QColor(self.okColorName)
+         self.okPalette.setColor(QPalette.Text, green)
+   
+         self.errorPalette   = QPalette()
+         self.errorColorName = 'firebrick'
+         red                 = QColor(self.errorColorName)
+         self.errorPalette.setColor(QPalette.Text, red)
+   
+   
+         ################################################
+         #                 Setup layout                 #
+         ################################################
+   
+         # Main tab widgets layout
+         self.layoutMain.setAlignment(Qt.AlignTop)
+         self.tabMain.setLayout(self.layoutMain)
+         self.tabs.addTab(self.tabMain, "")
+         
+         # Game layout
+         self.splashlabel.setText('Drawing game tab...')
+         self.root.processEvents()
+         self._makeLayoutGame()
+   
+         # Settings layout
+         self.splashlabel.setText('Drawing game tab...')
+         self.root.processEvents()
+         self._makeLayoutSettings()
+         
+         # Setup settings widgets state
+         self.splashlabel.setText('Setup default settings...')
+         self.root.processEvents()
+         self._setupSettings()
+         
+         # Grey out save button
+         self.saveButton.setEnabled(False)
+         
+         # Connect widgets to setting rules
+         self.rulesNbGrSpin.valueChanged.connect( lambda value: self.setRule(nbPlayers = value,            which='Other_rule'))
+         self.rulesTurnSpin.valueChanged.connect( lambda value: self.setRule(nbTurns = value,              which='Other_rule'))
+         self.rulesVow_Vow_S.stateChanged.connect(lambda value: self.setRule(VowtoVow_Single = value == 2, which='Modify_rule'))
+         self.rulesVow_Vow_A.stateChanged.connect(lambda value: self.setRule(VowtoVow_All = value == 2,    which='Modify_rule'))
+         self.rulesCon_Con_S.stateChanged.connect(lambda value: self.setRule(ContoCon_Single = value == 2, which='Modify_rule'))
+         self.rulesCon_Con_A.stateChanged.connect(lambda value: self.setRule(ContoCon_All = value == 2,    which='Modify_rule'))
+         self.rulesLet_Let_S.stateChanged.connect(lambda value: self.setRule(LettoLet_Single = value == 2, which='Modify_rule'))
+         self.rulesLet_Let_A.stateChanged.connect(lambda value: self.setRule(LettoLet_All = value == 2,    which='Modify_rule'))
+         self.rulesDel.stateChanged.connect(      lambda value: self.setRule(Delete = value == 2,          which='Modify_rule'))
+         self.rulesSwap.stateChanged.connect(     lambda value: self.setRule(Swap = value == 2,            which='Modify_rule'))
+   
+         # Main window layout
+         self.layoutWin.addWidget(self.tabs, 1, 1)
+         self.win.setLayout(self.layoutWin)
+         
+         # Status bar
+         self.splashlabel.setText('Drawing status bar...')
+         self.root.processEvents()
+         
+         font              = QFont()
+         font.setPointSize(8)
+         self.statusbar    = QStatusBar()
+         self.statusbar.setMaximumHeight(12)
+         self.statusbar.setFont(font)
+         self.layoutWin.addWidget(self.statusbar, 2, 1)
+         
+         
+         #####################################################
+         #                 Apply translation                 #
+         #####################################################
+         
+         self.splashlabel.setText('Translate interface...')
+         self.root.processEvents()
+         
+         self._setupTranslation()
+         self.translate(None)
+         self.currentTrans        = translation
+         
+         # Set treview section properties
+         self.treeview.header().setDefaultAlignment(Qt.AlignHCenter)
+         self.treeview.header().resizeSection(0, 100)
+         self.treeview.header().resizeSection(1, 50)
+   
+   
+         ###############################################
+         #               Setup shortcuts               #
+         ###############################################
+   
+         self.shortcuts           = {}
+         self.shortcuts['Ctrl+O'] = QShortcut(QKeySequence('Ctrl+O'), self.tabSettings)
+         self.shortcuts['Ctrl+O'].activated.connect(self.loadCorpus)
+         
+         self.shortcuts['Ctrl+R'] = QShortcut(QKeySequence('Ctrl+R'), self.tabMain)
+         self.shortcuts['Ctrl+R'].activated.connect(self.newSentence)
+   
+         self.shortcuts['Ctrl+P'] = QShortcut(QKeySequence('Ctrl+P'), self.tabMain)
+         self.shortcuts['Ctrl+P'].activated.connect(self.startGame)
+         
+   
+         ############################
+         #           Menu           #
+         ############################
+         
+         self.splashlabel.setText('Setting menu...')
+         self.root.processEvents()
+      
+         menubar           = self.menuBar()
+         transmenu         = menubar.addMenu('&Interface')
+         
+         # Setup actions given the languages found
+         for t in self.translations:
+             tbase         = opath.basename(t)
+             action        = QAction('&%s' %tbase.split('.yaml')[0], self)
+             action.triggered.connect(lambda *args, x=tbase: self.translate(x))
+             
+             transmenu.addAction(action)
+      finally:
+         self.splash.finish(self)
 
-      # Show application
-      self.setCentralWidget(self.win)
-      self.resize(800, 800)
-      self.show()
-      self.centre()
+         # Show application
+         self.setCentralWidget(self.win)
+         self.resize(800, 800)
+         self.show()
+         self.centre()
+         
+         self.statusbar.showMessage('Initialisation complete')
       
       
    #########################################################################
@@ -375,6 +433,8 @@ class App(QMainWindow):
                   method               = self.setMethods[method]
                   check(obj, method, val)
                   self.currentTrans    = transNameNoSuffix
+      
+            self.statusbar.showMessage('Translated interface to %s' %self.currentTrans)
    
       return
                
@@ -724,7 +784,7 @@ class App(QMainWindow):
        
        # Create as many groups as necessary
        nbGroups     = self.rulesNbGrSpin.value()
-       groups       = [bkd.LanguageGroup(self.sentence, self.language, self.vowels, self.consonants, idd='Group %d' %i) for i in range(1, nbGroups+1)]
+       groups       = [bkd.LanguageGroup(self.sentence, self.language, self.vowels, self.consonants, idd='%s %d' %(self.trans_prop['model']['headers'][0], i)) for i in range(1, nbGroups+1)]
        
        # Loop through each turn
        nbTurns      = self.rulesTurnSpin.value()
@@ -1055,9 +1115,8 @@ class App(QMainWindow):
       self._confRules = copy.deepcopy(self.rules)
       for which, values in self.rules.items():
          for setting, value in values.items():
-            self.rules[which][setting] = val
+            self.rules[which][setting] = value['value']
             
-      print(self.rules)
       return
    
    def saveSettings(self, *args, **kwargs):
@@ -1071,15 +1130,16 @@ class App(QMainWindow):
        rules       = self._confRules
        
        # Need to update the rules according to the state of each rule in self.rules dict
-       print(self.rules)
        for which, values in self.rules.items():
           for item, value in values.items():
              rules[which][item]['value'] = value
        
-       bkd.saveConfig('test.yaml', corpus=corpus, interface=interface, language=language, alterations=alterations, rules=rules)
+       bkd.saveConfig('configuration.yaml', corpus=corpus, interface=interface, language=language, alterations=alterations, rules=rules)
           
        # Grey out save icon
        self.saveButton.setEnabled(False)
+       self.statusbar.showMessage('Saved settings')
+       
        return
 
    def setRule(self, which=None, **kwargs):
@@ -1127,7 +1187,6 @@ class App(QMainWindow):
             value = Qt.Unchecked
       
       # Apply method
-      print(objName, methodName, value)
       method(value)
       
       return 0

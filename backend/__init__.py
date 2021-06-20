@@ -378,33 +378,51 @@ def setupTranslation(file):
 #          INITIAL SETUP          #
 ###################################
 
-def setup(scriptPath, configFile):
+def setup(scriptPath, configFile, parent=None):
    '''
    Setup program at startup.
 
+   :param parent: parent widget calling this function. If None, nothing is done.
    :param str scriptPath: path where the main program is located
    :param str configFile: name of the config file
+   
    :returns: conf dictionary, True if everything is ok or False otherwise, error message if any
    :rtype: dict, bool, str
    '''
 
    file                         = opath.join(scriptPath, configFile)
 
+   # Splashscreen
+   if parent is not None:
+      parent.splashlabel.setText('Reading configuration file...')
+      parent.root.processEvents()
+
+   # Read configuration
    if not opath.isfile(file):
       return {}, False, 'Configuration file is missing.'
    else:
       with open(file, 'r') as f:
          conf                   = yaml.load(f, Loader=yaml.Loader)
 
-      # Generate icons
+      # Splashscreen
+      if parent is not None:
+         parent.splashlabel.setText('Loading icons...')
+         parent.root.processEvents()
+
+      # 1) Generate icons
       icons, ok, msg            = loadIcons(scriptPath)
 
       if not ok:
          return {}, ok, msg
 
       conf['icons']             = icons
+      
+      # Splashscreen
+      if parent is not None:
+         parent.splashlabel.setText('Loading corpus...')
+         parent.root.processEvents()
 
-      # Load default corpus file if not empty
+      # 2) Load default corpus file if not empty
       corpusFile                = conf['corpus']
       text, ok, msg             = loadCorpus(scriptPath, corpusFile)
 
@@ -412,8 +430,13 @@ def setup(scriptPath, configFile):
          return {}, ok, msg
 
       conf['corpusText']        = text
+      
+      # Splashscreen
+      if parent is not None:
+         parent.splashlabel.setText('Building language...')
+         parent.root.processEvents()
 
-      # Build default language dict
+      # 3) Build default language dict
       languageFile              = conf['language']
       alterations               = conf['languageAlterations']
       language, ok, msg         = loadLanguage(scriptPath, languageFile, alt=alterations)
@@ -426,8 +449,13 @@ def setup(scriptPath, configFile):
       conf['consonants']        = language['consonants']
       conf['map_alternate']     = language['map_alternate']
       conf['map_alternate_inv'] = language['map_alternate_inv']
+      
+      # Splashscreen
+      if parent is not None:
+         parent.splashlabel.setText('Setup interface language...')
+         parent.root.processEvents()
 
-      # Load translation file
+      # 4) Load translation file
       translation, ok, msg      = loadTranslation(scriptPath, conf['interfaceLanguage'])
 
       if not ok:
