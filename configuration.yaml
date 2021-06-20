@@ -1,47 +1,47 @@
-corpus: 'corpus_balzac.txt'
-interfaceLanguage: 'Français.yaml'
-language: 'French.yaml'
-languageAlterations: False
+corpus: corpus_balzac.txt
+interfaceLanguage: "Fran\xE7ais.yaml"
+language: French.yaml
+languageAlterations: false
 rules:
+  Modify_rule:
+    ContoCon_All:
+      method: setCheckState
+      value: true
+      widget: rulesCon_Con_A
+    ContoCon_Single:
+      method: setCheckState
+      value: true
+      widget: rulesCon_Con_S
+    Delete:
+      method: setCheckState
+      value: false
+      widget: rulesDel
+    LettoLet_All:
+      method: setCheckState
+      value: false
+      widget: rulesLet_Let_A
+    LettoLet_Single:
+      method: setCheckState
+      value: false
+      widget: rulesLet_Let_S
+    Swap:
+      method: setCheckState
+      value: false
+      widget: rulesSwap
+    VowtoVow_All:
+      method: setCheckState
+      value: true
+      widget: rulesVow_Vow_A
+    VowtoVow_Single:
+      method: setCheckState
+      value: true
+      widget: rulesVow_Vow_S
   Other_rule:
-    nbPlayers: 
-      widget: rulesNbGrSpin
-      method: setValue
-      value: 4
-    nbTurns: 
-      widget: rulesTurnSpin
+    nbPlayers:
       method: setValue
       value: 5
-  Modify_rule:
-    VowtoVow_Single: 
-      widget: rulesVow_Vow_S
-      method: setCheckState
-      value: True
-    VowtoVow_All: 
-      widget: rulesVow_Vow_A
-      method: setCheckState
-      value: True
-    ContoCon_Single: 
-      widget: rulesCon_Con_S
-      method: setCheckState
-      value: True
-    ContoCon_All: 
-      widget: rulesCon_Con_A
-      method: setCheckState
-      value: True
-    LettoLet_Single: 
-      widget: rulesLet_Let_S
-      method: setCheckState
-      value: False
-    LettoLet_All: 
-      widget: rulesLet_Let_A
-      method: setCheckState
-      value: False
-    Delete: 
-      widget: rulesDel
-      method: setCheckState
-      value: False
-    Swap: 
-      widget: rulesSwap
-      method: setCheckState
-      value: False
+      widget: rulesNbGrSpin
+    nbTurns:
+      method: setValue
+      value: 6
+      widget: rulesTurnSpin
