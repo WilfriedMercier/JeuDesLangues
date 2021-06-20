@@ -5,7 +5,7 @@ import copy
 import sys
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
-   
+
 import random
 import os
 import os.path               as     opath
@@ -17,7 +17,6 @@ from   PyQt5.QtGui           import QKeySequence, QPalette, QColor, QStandardIte
 # Custom backend functions
 import backend               as     bkd
 import backend.sentences     as     snt
-import widgets.loadingScreen as     wload
 
 class App(QMainWindow):
    '''Main application.'''
