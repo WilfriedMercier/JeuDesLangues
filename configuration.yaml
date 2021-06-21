@@ -26,7 +26,7 @@ rules:
       widget: rulesLet_Let_S
     Swap:
       method: setCheckState
-      value: false
+      value: true
       widget: rulesSwap
     VowtoVow_All:
       method: setCheckState
@@ -39,7 +39,7 @@ rules:
   Other_rule:
     nbPlayers:
       method: setValue
-      value: 5
+      value: 4
       widget: rulesNbGrSpin
     nbTurns:
       method: setValue

@@ -42,7 +42,8 @@ class LanguageGroup:
         self.ruleMethods = {'VowtoVow_All'    : self.VowtoVow_All,
                             'VowtoVow_Single' : self.VowtoVow_Single,
                             'ContoCon_All'    : self.ContoCon_All,
-                            'ContoCon_Single' : self.ContoCon_Single
+                            'ContoCon_Single' : self.ContoCon_Single,
+                            'Swap'            : self.Swap
                            }
         
         
@@ -69,74 +70,6 @@ class LanguageGroup:
     ###################################
     #              Rules              #
     ###################################
-    
-    # Vowels
-    def VowtoVow_All(self, turn, *args, **kwargs):
-        ''''
-        Vowel to vowel on all words rule.
-        
-        :param str turn: name of the turn to put in the sentence dict
-        
-        :returns: output message for admin mode
-        :rtype: str
-        '''
-        
-        # Transform sentence
-        out             = sen.VowtoVow_All(self.sentence[-1], self.language, vowels=self.vowels)
-        if None not in out:
-
-            sentence    = out[0]
-            vowels      = out[1]
-            vowel_out   = out[2] 
-            vowel_in    = out[3]
-            
-            # Update vowels
-            self.vowels = vowels
-            
-            # Update sentence
-            self.sentence.append(sentence)
-            
-            # Message to output for admin mode
-            msg         = 'Turn %s: %s changed vowel %s to vowel %s in every word.' %(turn, self.id, vowel_out, vowel_in)
-        else:
-            self.sentence.append(self.sentence[-1])
-            msg         = 'Turn %s: %s made no modifications because no vowel was found in the sentence.' %(turn, self.id)
-        
-        return msg
-        
-    def VowtoVow_Single(self, turn, *args, **kwargs):
-        ''''
-        Vowel to vowel on a single word rule.
-        
-        :param str turn: name of the turn to put in the sentence dict
-        
-        :returns: output message for admin mode
-        :rtype: str
-        '''
-        
-        # Transform sentence
-        out             = sen.VowtoVow_Single(self.sentence[-1], self.language, vowels_sen=self.vowels)
-        if None not in out:
-        
-            sentence    = out[0]
-            word        = out[1]
-            vowels      = out[2]
-            vowel_out   = out[3] 
-            vowel_in    = out[4]
-            
-            # Update vowels
-            self.vowels = vowels
-            
-            # Update sentence
-            self.sentence.append(sentence)
-        
-            # Message to output for admin mode
-            msg         = 'Turn %s: %s changed vowel %s to vowel %s in word %s.' %(turn, self.id, vowel_out, vowel_in, word)
-        else:
-            self.sentence.append(self.sentence[-1])
-            msg         = 'Turn %s: %s made no modifications because no vowel was found in sentence.' %(turn, self.id)
-            
-        return msg
     
     # Consonants
     def ContoCon_All(self, turn, *args, **kwargs):
@@ -205,8 +138,109 @@ class LanguageGroup:
             msg             = 'Turn %s: %s made no modifications because no consonant was found in sentence.' %(turn, self.id)
             
         return msg
+    
+    # Swap words
+    def Swap(self, turn, *args, **kwargs):
+        '''
+        Swap two consecutive words rule.
+        
+        :param str turn: name of the turn to put in the sentence dict
+        
+        :returns: output message for admin mode
+        :rtype: str
+        '''
+        
+        # Transform sentence
+        out          = sen.Swap(self.sentence[-1])
+        
+        if None not in out:
+            
+            sentence = out[0]
+            word1    = out[1]
+            word2    = out[2]
+            
+            self.sentence.append(sentence)
+            
+            # Message to output for admin mode
+            msg      = 'Turn %s: %s swaped word %s with word %s.' %(turn, self.id, word1, word2)
+        else:
+            self.sentence.append(self.sentence[-1])
+            msg      = 'Turn %s: %s made no modifications because no words could be swaped.' %(turn, self.id)
+            
+        return msg
+    
+    # Vowels
+    def VowtoVow_All(self, turn, *args, **kwargs):
+        ''''
+        Vowel to vowel on all words rule.
+        
+        :param str turn: name of the turn to put in the sentence dict
+        
+        :returns: output message for admin mode
+        :rtype: str
+        '''
+        
+        # Transform sentence
+        out             = sen.VowtoVow_All(self.sentence[-1], self.language, vowels=self.vowels)
+        if None not in out:
+
+            sentence    = out[0]
+            vowels      = out[1]
+            vowel_out   = out[2] 
+            vowel_in    = out[3]
+            
+            # Update vowels
+            self.vowels = vowels
+            
+            # Update sentence
+            self.sentence.append(sentence)
+            
+            # Message to output for admin mode
+            msg         = 'Turn %s: %s changed vowel %s to vowel %s in every word.' %(turn, self.id, vowel_out, vowel_in)
+        else:
+            self.sentence.append(self.sentence[-1])
+            msg         = 'Turn %s: %s made no modifications because no vowel was found in the sentence.' %(turn, self.id)
+        
+        return msg
+        
+    def VowtoVow_Single(self, turn, *args, **kwargs):
+        ''''
+        Vowel to vowel on a single word rule.
+        
+        :param str turn: name of the turn to put in the sentence dict
+        
+        :returns: output message for admin mode
+        :rtype: str
+        '''
+        
+        # Transform sentence
+        out             = sen.VowtoVow_Single(self.sentence[-1], self.language, vowels_sen=self.vowels)
+        if None not in out:
+        
+            sentence    = out[0]
+            word        = out[1]
+            vowels      = out[2]
+            vowel_out   = out[3] 
+            vowel_in    = out[4]
+            
+            # Update vowels
+            self.vowels = vowels
+            
+            # Update sentence
+            self.sentence.append(sentence)
+        
+            # Message to output for admin mode
+            msg         = 'Turn %s: %s changed vowel %s to vowel %s in word %s.' %(turn, self.id, vowel_out, vowel_in, word)
+        else:
+            self.sentence.append(self.sentence[-1])
+            msg         = 'Turn %s: %s made no modifications because no vowel was found in sentence.' %(turn, self.id)
+            
+        return msg
 
 
+#######################################
+#          Loading utilities          #
+#######################################
 
 def loadCorpus(scriptPath, corpusFile):
    '''

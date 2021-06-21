@@ -398,3 +398,77 @@ def ContoCon_Single(sentence, language, consonants_sen=None):
 
    return sentence, word, consonants_sen, consonant_out, consonant_in
 
+def LettoLet_Single():
+   return
+
+def LettoLet_All():
+   return
+
+def Swap(sentence):
+   '''
+   Swap two consecutive words in the sentence and return the new sentence.
+   
+   :param str sentence: sentence from which two words will be swapped.
+   
+   :returns: new sentence or None, None, None if no words could be swapped
+   '''
+   
+   # Split the sentence excluding some characters
+   sentence_split     = make_words(sentence)
+   ll                 = len(sentence_split)
+   ll1                = ll-1
+   
+   # If only a single word, we cannot swap
+   if ll < 2:
+      return None, None, None
+   
+   # Split the sentence keeping characters such as , in words
+   sentence_rec       = sentence.split(' ')
+   
+   # Only find words ok to be swapped (no special characters)
+   okPos              = []
+   for pos in range(ll):
+       
+      # Current word to check
+      split           = sentence_split[pos]
+      rec             = sentence_rec[pos]
+      
+      # Next or previous word to check
+      if pos == ll1:
+         osplit       = sentence_split[pos-1]
+         orec         = sentence_rec[pos-1]
+      else:
+         osplit       = sentence_split[pos+1]
+         orec         = sentence_rec[pos+1]
+         
+      # We save the word only if both are ok to be swapped
+      if split == rec and osplit == orec:
+         okPos.append(pos)
+   
+   # If no words meet the criteria, no swap
+   if len(okPos) == 0:
+      return None, None, None
+   
+   # Pick a position in the sentence
+   pos1               = random.choice(okPos)
+   word1              = sentence_rec[pos1]
+   
+   if pos1 == ll1:
+      pos2            = pos1-1
+   else:
+      pos2            = pos1+1
+   
+   # Replace words in sentence list
+   word2              = sentence_rec[pos2]
+   sentence_rec[pos2] = word1
+   sentence_rec[pos1] = word2
+   
+   # Reconstruct the sentence
+   sentence           = ' '.join(sentence_rec)
+   
+   return sentence, word1, word2
+
+
+
+
+

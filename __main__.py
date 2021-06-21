@@ -790,8 +790,10 @@ class App(QMainWindow):
        for i in range(nbTurns):
            
            # Pick a rule (we will remove the loop once we've included all the methods)
+           print(self.rules['Modify_rule'])
+           print([key for key, value in self.rules['Modify_rule'].items() if value])
            rule     = random.choice(list(self.rules['Modify_rule'].keys()))
-           while rule not in ['VowtoVow_All', 'VowtoVow_Single', 'ContoCon_All', 'ContoCon_Single']:
+           while rule not in ['VowtoVow_All', 'VowtoVow_Single', 'ContoCon_All', 'ContoCon_Single', 'Swap']:
                rule = random.choice(list(self.rules['Modify_rule'].keys()))
            
            # Loop through each group
