@@ -19,7 +19,7 @@ Library | Installation | Use
 
 ### How to play ?
 
-![](readme/interface.png)
+<p align="center"><img src="readme/interface.png"></p>
 
 Playing is quite easy. Here are the (very few) steps to follow __each time__:
 
@@ -29,7 +29,7 @@ Playing is quite easy. Here are the (very few) steps to follow __each time__:
 
 ### Settings
 
-![](readme/settings.png)
+<p align="center"><img src="readme/settings.png"></p>
 
 A wide range of settings are available for the user to tweak the diffculty or adapt the game to another language. See the documentation for more technical details on how to add your language to the game.
 
@@ -50,7 +50,5 @@ Single word letter to letter shift       | <span style="color:#f60000ff">No</spa
 All words letter to letter shift         | <span style="color:#f60000ff">No</span>  | Each group picks a letter and replaces each occurence in the sentence by another one randomly picked
 Letter deletion                          | <span style="color:#f60000ff">No</span>  | Each group picks a letter in a word and removes it
 Swap words                               | <span style="color:#085700ff">Yes</span> | Each group picks two consecutive words (except 1st and last) and swap their positions
-
-
 
 __Warning:__ _This software is for entertainment purposes only. It is not designed by any means whatsoever to be scientifically acurate. If used in an educational context, then one must understand that its content is very limited and not directly based on any scientific litterature._
