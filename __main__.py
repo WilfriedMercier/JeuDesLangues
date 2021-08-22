@@ -12,7 +12,7 @@ import os.path               as     opath
 
 from   PyQt5.QtWidgets       import QMainWindow, QApplication, QMenuBar, QAction, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QVBoxLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView, QAbstractItemView, QStatusBar, QSplashScreen
 from   PyQt5.QtCore          import Qt, pyqtSlot, QSize, QEventLoop
-from   PyQt5.QtGui           import QKeySequence, QPalette, QColor, QStandardItemModel, QStandardItem, QFont, QPixmap
+from   PyQt5.QtGui           import QKeySequence, QPalette, QColor, QStandardItemModel, QStandardItem, QFont, QPixmap, QIcon
 
 # Custom backend functions
 import backend               as     bkd
@@ -23,15 +23,17 @@ class App(QMainWindow):
 
    def __init__(self, root, iconsPath='icons', *args, **kwargs):
       '''Initialise the application.'''
-      
+
       self.root               = root
       super().__init__()
-      self.setWindowTitle('Jeu des langues (EBTP)')
-      
+
       # Script current dir
       self.scriptDir          = opath.dirname(opath.realpath(__file__))
 
-      
+      self.setWindowTitle('Jeu des langues (EBTP)')
+      self.setWindowIcon(QIcon(opath.join(self.scriptDir, 'icon.png')))
+
+
       ###################################
       #       Setup splash screen       #
       ###################################
@@ -239,8 +241,9 @@ class App(QMainWindow):
          # Show application
          self.setCentralWidget(self.win)
          self.resize(800, 800)
-         self.show()
+         self.setTheme('default')
          self.centre()
+         self.show()
          
          self.statusbar.showMessage('Initialisation complete')
       
@@ -692,6 +695,51 @@ class App(QMainWindow):
       self.tabs.addTab(self.tabSettings, "&Settings")
 
       return
+  
+    
+   #####################################
+   #          Interface theme          #
+   #####################################
+   
+   def setTheme(self, theme, *args, **kwargs):
+       '''
+       Set the given theme (defined in __init__) to the interface.
+
+       :param str theme: theme to apply to the interface
+
+       :returns: True if the theme exists, False otherwise
+       '''
+       
+       self.themes = {'default' : {'win'     : 'background: lavender',
+                                   'tabMain' : 'background: ivory',
+                                   'senBox'  : ":title{'background: blue'}",
+                                   'treeview' : 'background: lavender',
+                                  }
+                     }
+       
+       theme           = theme.lower()
+       
+       if theme in self.themes:
+           themeDict   = self.themes[theme]
+           
+           # Loop through objects listed in theme
+           for objName, value in themeDict.items():
+               
+               # Get object, if not found, pass to next one
+               try:
+                   obj = getattr(self, objName)
+               except AttributeError:
+                   print('Error: object %s not in self.' %objName)
+                   continue
+               
+               # Apply stylesheet to the object
+               obj.setStyleSheet(value)
+               
+       else:
+           self.statusbar.showMessage('Theme %s not found in theme list.' %theme)
+           return False
+       
+       return True
   
     
    ##############################################

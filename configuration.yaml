@@ -39,7 +39,7 @@ rules:
   Other_rule:
     nbPlayers:
       method: setValue
-      value: 4
+      value: 3
       widget: rulesNbGrSpin
     nbTurns:
       method: setValue
