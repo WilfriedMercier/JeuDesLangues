@@ -475,9 +475,6 @@ class App(QMainWindow):
       
       self.scoreLabel      = QLabel('/10')
       self.scoreLabel.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
-      self.scoreLabel.setStyleSheet('''font-size: 24px;
-                                       font: bold italic "Dyuthi";
-                                    ''')
       
       # Play button
       self.playButton      = QPushButton('')
@@ -710,30 +707,74 @@ class App(QMainWindow):
        :returns: True if the theme exists, False otherwise
        '''
        
-       self.themes = {'default' : {'win'     : 'background: lavender',
-                                   'tabMain' : 'background: ivory',
-                                   'senBox'  : ":title{'background: blue'}",
-                                   'treeview' : 'background: lavender',
+       def getObj(parent, objName):
+          '''
+          Get the object with the given name if it exists.
+          
+          :param str objName: object name
+          
+          :returns: object
+          '''
+           
+          try:
+             obj = getattr(parent, objName)
+          except AttributeError:
+             print('Error: object %s not in %s.' %(objName, parent))
+             obj = None
+             
+          return obj
+       
+       self.themes = {'default' : {'win'         : 'background: lavender',
+                                   'tabMain'     : 'background: ivory',
+                                   'tabSettings' : 'background: ivory',
+                                   'senBox'      : "QGroupBox:title {subcontrol-origin: margin; padding: 0 3px; left: 0.5ex} QGroupBox { border: 2px solid grey; border-radius: 15px; margin-top: 1.3ex; background-color: lavender;}",
+                                   'senLabel'    : 'background: lavender;',
+                                   'scoreBox'    : "QGroupBox:title {subcontrol-origin: margin; padding: 0 3px; left: 0.5ex} QGroupBox { border: 2px solid grey; border-radius: 15px; margin-top: 1.3ex; background-color: lavender;}",
+                                   'scoreLabel'  : 'background: lavender; font-size: 24px; font: bold italic "Dyuthi";',
+                                   'guessLabel'  : 'background: lavender;',
+                                   'guessEntry'  : 'background: lavender; border: 2px solid grey; border-radius: 10px;',
+                                   'treeview'    : {None     : 'background: lavender; border: 2px solid grey; border-radius: 15px; top: 15em',
+                                                    'header()' : 'border: 5px solid black'},
                                   }
                      }
        
-       theme           = theme.lower()
-       
+       theme         = theme.lower()
        if theme in self.themes:
-           themeDict   = self.themes[theme]
+           themeDict = self.themes[theme]
            
            # Loop through objects listed in theme
            for objName, value in themeDict.items():
-               
-               # Get object, if not found, pass to next one
-               try:
-                   obj = getattr(self, objName)
-               except AttributeError:
-                   print('Error: object %s not in self.' %objName)
-                   continue
-               
-               # Apply stylesheet to the object
-               obj.setStyleSheet(value)
+              
+               # Get parent object
+               obj   = getObj(self, objName)
+                   
+               # If value is a dict, then we need to loop
+               if isinstance(value, dict):
+                   
+                   # If object exists, loop through methods in object
+                   if obj is not None:           
+                      
+                      # Start with None (object itself) and then remove it
+                      obj.setStyleSheet(value[None])
+                      value.pop(None)
+                      
+                      # Loop through remaining methods
+                      for elem, elemVal in value.items():
+                      
+                         # Get child object
+                         child = getObj(obj, elem)
+                         
+                         # If child object exists, apply method
+                         if child is not None:
+                            print(child)
+                            child.setStyleSheet(elemVal)
+                            
+               # If not a dict, then no need to loop
+               else:
+                  
+                  # If object exists we apply the method
+                  if obj is not None:
+                     obj.setStyleSheet(value)
                
        else:
            self.statusbar.showMessage('Theme %s not found in theme list.' %theme)
