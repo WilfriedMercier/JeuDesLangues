@@ -43,5 +43,5 @@ rules:
       widget: rulesNbGrSpin
     nbTurns:
       method: setValue
-      value: 6
+      value: 10
       widget: rulesTurnSpin

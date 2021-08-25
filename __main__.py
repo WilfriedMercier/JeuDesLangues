@@ -10,7 +10,7 @@ import random
 import os
 import os.path               as     opath
 
-from   PyQt5.QtWidgets       import QMainWindow, QApplication, QMenuBar, QAction, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QVBoxLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView, QAbstractItemView, QStatusBar, QSplashScreen
+from   PyQt5.QtWidgets       import QFrame, QMainWindow, QApplication, QMenuBar, QAction, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QVBoxLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView, QAbstractItemView, QStatusBar, QSplashScreen
 from   PyQt5.QtCore          import Qt, pyqtSlot, QSize, QEventLoop
 from   PyQt5.QtGui           import QKeySequence, QPalette, QColor, QStandardItemModel, QStandardItem, QFont, QPixmap, QIcon
 
@@ -504,6 +504,7 @@ class App(QMainWindow):
       self.guessEntry.textChanged.connect(self.guessEdited)
       self.guessEntry.returnPressed.connect(self.validateGame)
       self.guessEntry.setEnabled(False)
+      self.guessEntry.setTextMargins(5, 0, 10, 0)
       
       # Validate button
       self.validateButton  = QPushButton('')
@@ -732,11 +733,12 @@ class App(QMainWindow):
                                    'scoreBox'    : "QGroupBox:title {subcontrol-origin: margin; padding: 0 3px; left: 0.5ex} QGroupBox { border: 2px solid grey; border-radius: 15px; margin-top: 1.3ex; background-color: lavender;}",
                                    'scoreLabel'  : 'background: lavender; font-size: 24px; font: bold italic "Dyuthi";',
                                    'guessLabel'  : 'background: lavender;',
-                                   'guessEntry'  : 'background: lavender; border: 2px solid grey; border-radius: 10px;',
+                                   'guessEntry'  : 'background: lavender; border: 2px solid grey; border-radius: 10px; color: royalblue',
                                    'treeview'    : {None     : 'background: lavender; border: 2px solid grey; border-radius: 15px; top: 15em',
-                                                    'header()' : 'border: 5px solid black'},
+                                                    'header' : 'QHeaderView {border : none; border-bottom: 2px solid grey; border-radius: 10px;} QHeaderView:section {background: lavender; border: none; border-radius: 10px}'},
                                   }
                      }
+       
        
        theme         = theme.lower()
        if theme in self.themes:
@@ -766,8 +768,7 @@ class App(QMainWindow):
                          
                          # If child object exists, apply method
                          if child is not None:
-                            print(child)
-                            child.setStyleSheet(elemVal)
+                            child().setStyleSheet(elemVal)
                             
                # If not a dict, then no need to loop
                else:
