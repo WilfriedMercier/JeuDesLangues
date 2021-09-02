@@ -11,7 +11,7 @@ import os
 import os.path               as     opath
 
 from   PyQt5.QtWidgets       import QFrame, QMainWindow, QApplication, QMenuBar, QAction, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QVBoxLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView, QAbstractItemView, QStatusBar, QSplashScreen
-from   PyQt5.QtCore          import Qt, pyqtSlot, QSize, QEventLoop
+from   PyQt5.QtCore          import Qt, pyqtSlot, QSize, QEventLoop, QFile, QIODevice, QTextStream
 from   PyQt5.QtGui           import QKeySequence, QPalette, QColor, QStandardItemModel, QStandardItem, QFont, QPixmap, QIcon
 
 # Custom backend functions
@@ -143,12 +143,12 @@ class App(QMainWindow):
          # Game layout
          self.splashlabel.setText('Drawing game tab...')
          self.root.processEvents()
-         self._makeLayoutGame()
+         self.gameTabWidgets    = self._makeLayoutGame()
    
          # Settings layout
          self.splashlabel.setText('Drawing game tab...')
          self.root.processEvents()
-         self._makeLayoutSettings()
+         self.settingTabWidgets = self._makeLayoutSettings()
          
          # Setup settings widgets state
          self.splashlabel.setText('Setup default settings...')
@@ -446,7 +446,12 @@ class App(QMainWindow):
    ####################################
 
    def _makeLayoutGame(self, *args, **kwargs):
-      '''Make the layout for the game tab.'''
+      '''
+      Make the layout for the game tab.
+      
+      :returns: list of widgets belonging to this tab (used for theming only)
+      :rtype: list
+      '''
 
       #####################
       #      Widgets      #
@@ -552,7 +557,8 @@ class App(QMainWindow):
       self.layoutMain.setColumnStretch(4, 1)
       self.layoutMain.setColumnStretch(2, 10)
 
-      return
+      return [self.genButton, self.senBox, self.senLabel, self.guessLabel, self.scoreBox, self.scoreLabel, 
+              self.playButton, self.treeview, self.guessEntry, self.validateButton]
 
    def _makeLayoutSettings(self, *args, **kwargs):
       '''Make the layout for the settings tab.'''
@@ -725,6 +731,18 @@ class App(QMainWindow):
              
           return obj
        
+       # Need to test whether the file exists
+       stream = QFile(opath.join('themes', theme))
+       stream.open(QIODevice.ReadOnly)
+       text   = QTextStream(stream).readAll()
+
+       # Go through widgets in the game tab       
+       for widget in self.gameTabWidgets:
+           widget.setStyleSheet(text)
+       
+       return True
+   
+       # Keep away for now
        self.themes = {'default' : {'win'         : 'background: lavender',
                                    'tabMain'     : 'background: ivory',
                                    'tabSettings' : 'background: ivory',
