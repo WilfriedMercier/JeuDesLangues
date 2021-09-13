@@ -1,8 +1,36 @@
-QLineEdit {     border: 1px solid gray;
-                border-radius: 5px;
-                padding: 0 8px;
-                selection-background-color:darkgray;
-                height:40px;
-                font-size:15px;}
+QMainWindow{ background: lavender;}
 
-QMainWindow{    background: black;}
+QWidget{ background: lavender;}
+
+QWidget#Tab{ background: ivory;}
+
+QGroupBox{ border: 2px solid grey; 
+           border-radius: 15px; 
+           margin-top: 1.3ex; 
+           background-color: lavender;}
+
+QGroupBox::title{ subcontrol-origin: margin; 
+                  padding: 0 3px; 
+                  left: 0.5ex} 
+
+QGroupBox#Score{ border: 2px solid grey; 
+                 border-radius: 15px; 
+                 margin-top: 1.3ex; 
+                 background-color: lavender;}
+
+QGroupBox::title#Score{ subcontrol-origin: margin; 
+                        padding: 0 3px; 
+                        left: 0.5ex;}
+
+QLabel#Sentence{ background: lavender;}
+
+QLabel#score{ background: lavender; 
+              font-size: 24px; 
+              font: bold italic "Dyuthi";}
+
+QLabel#Guess{ background: lavender;}
+
+QEntry{ background: lavender; 
+        border: 2px solid grey; 
+        border-radius: 10px; 
+        color: royalblue;}
