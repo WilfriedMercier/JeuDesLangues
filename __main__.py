@@ -110,9 +110,11 @@ class App(QMainWindow):
          self.tabs           = QTabWidget()
    
          self.tabMain        = QWidget()
+         self.tabMain.setObjectName('Tab')
          self.layoutMain     = QGridLayout()
    
          self.tabSettings    = QWidget()
+         self.tabSettings.setObjectName('Tab')
          self.layoutSettings = QGridLayout()
          
    
@@ -146,7 +148,7 @@ class App(QMainWindow):
          self.gameTabWidgets    = self._makeLayoutGame()
    
          # Settings layout
-         self.splashlabel.setText('Drawing game tab...')
+         self.splashlabel.setText('Drawing settings tab...')
          self.root.processEvents()
          self.settingTabWidgets = self._makeLayoutSettings()
          
@@ -244,8 +246,6 @@ class App(QMainWindow):
          self.setTheme('default')
          self.centre()
          self.show()
-         
-         self.statusbar.showMessage('Initialisation complete')
       
       
    #########################################################################
@@ -469,16 +469,20 @@ class App(QMainWindow):
       self.layoutSenbox    = QGridLayout()
 
       self.senLabel        = QLabel('')
+      self.senLabel.setObjectName('Sentence')
       
       # Guess label only shown when the validate button is hit
       self.guessLabel      = QLabel('')
+      self.guessLabel.setObjectName('Sentence')
       self.guessLabel.setTextFormat(Qt.RichText)
       
       # Score label
       self.scoreBox        = QGroupBox('')
+      self.scoreBox.setObjectName('Score')
       self.layoutScore     = QGridLayout()
       
       self.scoreLabel      = QLabel('/10')
+      self.scoreLabel.setObjectName('score')
       self.scoreLabel.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
       
       # Play button
@@ -557,7 +561,7 @@ class App(QMainWindow):
       self.layoutMain.setColumnStretch(4, 1)
       self.layoutMain.setColumnStretch(2, 10)
 
-      return [self.genButton, self.senBox, self.senLabel, self.guessLabel, self.scoreBox, self.scoreLabel, 
+      return [self.genSenButton, self.senBox, self.senLabel, self.guessLabel, self.scoreBox, self.scoreLabel, 
               self.playButton, self.treeview, self.guessEntry, self.validateButton]
 
    def _makeLayoutSettings(self, *args, **kwargs):
@@ -698,7 +702,7 @@ class App(QMainWindow):
       self.tabSettings.setLayout(self.layoutSettings)
       self.tabs.addTab(self.tabSettings, "&Settings")
 
-      return
+      return []
   
     
    #####################################
@@ -712,94 +716,48 @@ class App(QMainWindow):
        :param str theme: theme to apply to the interface
 
        :returns: True if the theme exists, False otherwise
+       :rtype: bool
+       
+       :raises TypeError: if **theme** is not of type str
        '''
        
-       def getObj(parent, objName):
-          '''
-          Get the object with the given name if it exists.
-          
-          :param str objName: object name
-          
-          :returns: object
-          '''
-           
-          try:
-             obj = getattr(parent, objName)
-          except AttributeError:
-             print('Error: object %s not in %s.' %(objName, parent))
-             obj = None
-             
-          return obj
+       if not isinstance(theme, str):
+           raise TypeError(f'theme parameter has type {type(theme)} but it must be of type str.')
        
        # Need to test whether the file exists
-       stream = QFile(opath.join('themes', theme))
+       file   = opath.join('themes', f'{theme}.qss')
+       if not opath.isfile(file):
+           print(file)
+           self.statusbar.showMessage(f'Could not load {theme} theme from theme directory. Theme not found.')
+           return False
+           
+       # Open file
+       stream = QFile(file)
        stream.open(QIODevice.ReadOnly)
        text   = QTextStream(stream).readAll()
-
+       
        # Go through widgets in the game tab       
        for widget in self.gameTabWidgets:
            widget.setStyleSheet(text)
        
+       # Go through widgets in the 
+       for widget in self.settingTabWidgets:
+           widget.setStyleSheet(text)
+           
+       # Set style onto main widgets
+       self.tabMain.setStyleSheet(text) 
+       self.tabSettings.setStyleSheet(text)
+       self.tabs.setStyleSheet(text)
+       self.win.setStyleSheet(text)
+       
        return True
    
        # Keep away for now
-       self.themes = {'default' : {'win'         : 'background: lavender',
-                                   'tabMain'     : 'background: ivory',
-                                   'tabSettings' : 'background: ivory',
-                                   'senBox'      : "QGroupBox:title {subcontrol-origin: margin; padding: 0 3px; left: 0.5ex} QGroupBox { border: 2px solid grey; border-radius: 15px; margin-top: 1.3ex; background-color: lavender;}",
-                                   'senLabel'    : 'background: lavender;',
-                                   'scoreBox'    : "QGroupBox:title {subcontrol-origin: margin; padding: 0 3px; left: 0.5ex} QGroupBox { border: 2px solid grey; border-radius: 15px; margin-top: 1.3ex; background-color: lavender;}",
-                                   'scoreLabel'  : 'background: lavender; font-size: 24px; font: bold italic "Dyuthi";',
-                                   'guessLabel'  : 'background: lavender;',
-                                   'guessEntry'  : 'background: lavender; border: 2px solid grey; border-radius: 10px; color: royalblue',
-                                   'treeview'    : {None     : 'background: lavender; border: 2px solid grey; border-radius: 15px; top: 15em',
+       self.themes = {'default' : {'treeview'    : {None     : 'background: lavender; border: 2px solid grey; border-radius: 15px; top: 15em',
                                                     'header' : 'QHeaderView {border : none; border-bottom: 2px solid grey; border-radius: 10px;} QHeaderView:section {background: lavender; border: none; border-radius: 10px}'},
                                   }
                      }
        
-       
-       theme         = theme.lower()
-       if theme in self.themes:
-           themeDict = self.themes[theme]
-           
-           # Loop through objects listed in theme
-           for objName, value in themeDict.items():
-              
-               # Get parent object
-               obj   = getObj(self, objName)
-                   
-               # If value is a dict, then we need to loop
-               if isinstance(value, dict):
-                   
-                   # If object exists, loop through methods in object
-                   if obj is not None:           
-                      
-                      # Start with None (object itself) and then remove it
-                      obj.setStyleSheet(value[None])
-                      value.pop(None)
-                      
-                      # Loop through remaining methods
-                      for elem, elemVal in value.items():
-                      
-                         # Get child object
-                         child = getObj(obj, elem)
-                         
-                         # If child object exists, apply method
-                         if child is not None:
-                            child().setStyleSheet(elemVal)
-                            
-               # If not a dict, then no need to loop
-               else:
-                  
-                  # If object exists we apply the method
-                  if obj is not None:
-                     obj.setStyleSheet(value)
-               
-       else:
-           self.statusbar.showMessage('Theme %s not found in theme list.' %theme)
-           return False
-       
-       return True
   
     
    ##############################################
