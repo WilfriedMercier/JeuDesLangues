@@ -469,11 +469,9 @@ class App(QMainWindow):
       self.layoutSenbox    = QGridLayout()
 
       self.senLabel        = QLabel('')
-      self.senLabel.setObjectName('Sentence')
       
       # Guess label only shown when the validate button is hit
       self.guessLabel      = QLabel('')
-      self.guessLabel.setObjectName('Sentence')
       self.guessLabel.setTextFormat(Qt.RichText)
       
       # Score label
@@ -596,6 +594,7 @@ class App(QMainWindow):
 
       # Second line minimum words spinbox
       self.minwordSpin    = QSpinBox()
+      self.minwordSpin.setObjectName('Type1')
       self.minwordSpin.setMinimum(1)
       self.minwordSpin.setMaximum(10)
 
@@ -605,6 +604,7 @@ class App(QMainWindow):
 
       # Second line maximum words spinbox
       self.maxwordSpin    = QSpinBox()
+      self.maxwordSpin.setObjectName('Type1')
       self.maxwordSpin.setMinimum(3)
       
       self.minwordSpin.valueChanged.connect(self._minimumWordsChanged)
@@ -617,14 +617,17 @@ class App(QMainWindow):
       self.layoutRules    = QGridLayout()
 
       self.rulesNbGrSpin  = QSpinBox()
+      self.rulesNbGrSpin.setObjectName('Type2')
       self.rulesNbGrSpin.setMinimum(1)
       
       self.rulesNbGrText  = QLabel('')
 
       self.rulesTurnSpin  = QSpinBox()
+      self.rulesTurnSpin.setObjectName('Type2')
       self.rulesTurnSpin.setMinimum(1)
       
       self.rulesTurnText  = QLabel('')
+      
       self.rulesVow_Vow_S = QCheckBox('')
       self.rulesVow_Vow_A = QCheckBox('')
       self.rulesCon_Con_S = QCheckBox('')
@@ -735,12 +738,12 @@ class App(QMainWindow):
        stream = QFile(file)
        stream.open(QIODevice.ReadOnly)
        text   = QTextStream(stream).readAll()
-       
+   
        # Go through widgets in the game tab       
        for widget in self.gameTabWidgets:
            widget.setStyleSheet(text)
        
-       # Go through widgets in the 
+       # Go through widgets in the settings tab
        for widget in self.settingTabWidgets:
            widget.setStyleSheet(text)
            
@@ -751,13 +754,6 @@ class App(QMainWindow):
        self.win.setStyleSheet(text)
        
        return True
-   
-       # Keep away for now
-       self.themes = {'default' : {'treeview'    : {None     : 'background: lavender; border: 2px solid grey; border-radius: 15px; top: 15em',
-                                                    'header' : 'QHeaderView {border : none; border-bottom: 2px solid grey; border-radius: 10px;} QHeaderView:section {background: lavender; border: none; border-radius: 10px}'},
-                                  }
-                     }
-       
   
     
    ##############################################
