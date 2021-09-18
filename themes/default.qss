@@ -1,36 +1,108 @@
-QMainWindow{ background: lavender;}
+QMainWindow { 
+            background: lavender;
+}
 
-QWidget{ background: lavender;}
+QWidget { 
+        background: lavender;
+}
 
-QWidget#Tab{ background: ivory;}
+QWidget#Tab { 
+            background: ivory;
+}
 
-QGroupBox{ border: 2px solid grey; 
-           border-radius: 15px; 
-           margin-top: 1.3ex; 
-           background-color: lavender;}
+QGroupBox { 
+          border: 2px solid grey; 
+          border-radius: 15px; 
+          margin-top: 1.3ex; 
+          background-color: lavender;
+}
 
-QGroupBox::title{ subcontrol-origin: margin; 
-                  padding: 0 3px; 
-                  left: 0.5ex} 
+QGroupBox::title { 
+                 subcontrol-origin: margin; 
+                 padding: 0 3px; 
+                 left: 0.5ex
+} 
 
-QGroupBox#Score{ border: 2px solid grey; 
-                 border-radius: 15px; 
-                 margin-top: 1.3ex; 
-                 background-color: lavender;}
+QGroupBox#Score { 
+                border: 2px solid grey; 
+                border-radius: 15px; 
+                margin-top: 1.3ex; 
+                background-color: lavender;
+}
 
-QGroupBox::title#Score{ subcontrol-origin: margin; 
-                        padding: 0 3px; 
-                        left: 0.5ex;}
+QGroupBox::title#Score { 
+                       subcontrol-origin: margin; 
+                       padding: 0 3px; 
+                       left: 0.5ex;
+}
 
-QLabel#Sentence{ background: lavender;}
+QLabel {
+       background: transparent;
+}
 
-QLabel#score{ background: lavender; 
-              font-size: 24px; 
-              font: bold italic "Dyuthi";}
+QLabel#score { 
+             background: transparent; 
+             font-size: 24px; 
+             font: bold italic "Dyuthi";
+}
 
-QLabel#Guess{ background: lavender;}
+QEntry { 
+       background: lavender; 
+       border: 2px solid grey; 
+       border-radius: 10px; 
+       color: royalblue;
+}
 
-QEntry{ background: lavender; 
-        border: 2px solid grey; 
-        border-radius: 10px; 
-        color: royalblue;}
+QTreeView {
+          background: lavender; 
+          border: 2px solid grey; 
+          border-radius: 10px;
+}
+
+QHeaderView {
+            border: 1px solid transparent; 
+            border-bottom: 2px solid grey;
+            background-color: rgba(255, 255, 255, 0);
+} 
+
+QHeaderView::section {
+                     background-color: rgba(255, 255, 255, 0);
+                     border: 1px solid transparent;
+}
+
+QSpinBox#Type1 {
+               background: lavender;
+}
+
+QSpinBox#Type2 {
+               background: ivory;
+}
+
+QCheckBox::indicator {
+                     height: 15px;
+                     width: 15px;
+}
+
+QCheckBox::indicator:checked { 
+                              image : url(icons/check.png); 
+                              background-color : ivory;
+                              border: 1px solid grey;
+}
+
+QCheckBox::indicator:checked:hover {
+                                   image : url(icons/check.png); 
+                                   background-color : ivory;
+                                   border: 1px solid royalblue;
+}
+
+QCheckBox::indicator:unchecked {
+                               background-color : ivory;
+                               border: 1px solid grey;
+}
+
+QCheckBox::indicator:unchecked:hover {
+                                   background-color : ivory;
+                                   border: 1px solid royalblue;
+}
+
+
