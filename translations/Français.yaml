@@ -82,3 +82,12 @@ selectCorpus:
   caption: 'Choisir un fichier corpus...'
 saveButton:
   tooltip: 'Cliquez pour enregistrer les paramètres actuels'
+easyRuleBox:
+  title: 'Facile'
+  tooltip: 'Sélectionne les règles de difficulté facile'
+mediumRuleBox:
+  title: 'Moyen'
+  tooltip: 'Sélectionne toutes les règles de difficulté moyenne'
+hardRuleBox:
+  title: 'Difficle'
+  tooltip: 'Sélectionne toutes les règles de difficulté difficile'
