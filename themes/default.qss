@@ -36,7 +36,36 @@ QGroupBox::title {
                  subcontrol-origin: margin; 
                  padding: 0 3px; 
                  left: 0.5ex
-} 
+}
+
+QGroupBox::indicator:checked { 
+                             image : url(icons/check.png); 
+                             background-color : ivory;
+                             border: 1px solid grey;
+}
+
+QGroupBox::indicator:unchecked {
+                               background-color : ivory;
+                               border: 1px solid grey;
+}
+
+QGroupBox::indicator:unchecked:hover {
+                                     background-color : ivory;
+                                     border: 1px solid royalblue;
+}
+
+
+QGroupBox#Green {
+                color: green
+}
+
+QGroupBox#Orange {
+                 color: orange
+}
+
+QGroupBox#Red {
+              color: red
+}
 
 QGroupBox#Score { 
                 border: 2px solid grey; 
