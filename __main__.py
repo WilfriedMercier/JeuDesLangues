@@ -104,6 +104,7 @@ class App(QMainWindow):
    
          # Window
          self.win            = QWidget()
+         self.win.setObjectName('Main')
          self.layoutWin      = QGridLayout()
    
          # Tabs
@@ -571,6 +572,7 @@ class App(QMainWindow):
 
       # Top line input text
       self.inputText     = QLabel('')
+      self.inputText.setObjectName('Title')
       self.inputText.setAlignment(Qt.AlignTop)
 
       # Top line input entry
@@ -590,6 +592,7 @@ class App(QMainWindow):
 
       # Second line minimum words text
       self.minwordText    = QLabel('')
+      self.minwordText.setObjectName('Title')
       self.minwordText.setAlignment(Qt.AlignTop)
 
       # Second line minimum words spinbox
@@ -600,6 +603,7 @@ class App(QMainWindow):
 
       # Second line maximum words text
       self.maxwordText    = QLabel('')
+      self.maxwordText.setObjectName('Title')
       self.maxwordText.setAlignment(Qt.AlignTop)
 
       # Second line maximum words spinbox
