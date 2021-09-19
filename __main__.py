@@ -632,12 +632,30 @@ class App(QMainWindow):
       
       self.rulesTurnText  = QLabel('')
       
+      # Easy rules in third line group box
+      self.easyRuleBox    = QGroupBox('')
+      self.easyRuleBox.setObjectName('Green')
+      self.easyRuleBox.setCheckable(True)
+      self.easyRuleBox.toggled.connect(lambda check, *args, **kwargs: self.ruleCheck(check, self.easyRuleBox, *args, **kwargs))
+      self.layoutEasy     = QGridLayout()
       self.rulesVow_Vow_S = QCheckBox('')
-      self.rulesVow_Vow_A = QCheckBox('')
       self.rulesCon_Con_S = QCheckBox('')
-      self.rulesCon_Con_A = QCheckBox('')
       self.rulesLet_Let_S = QCheckBox('')
+      
+      # Medium rules in third line group box
+      self.mediumRuleBox  = QGroupBox('')
+      self.mediumRuleBox.setObjectName('Orange')
+      self.mediumRuleBox.setCheckable(True)
+      self.layoutMedium   = QGridLayout()
+      self.rulesVow_Vow_A = QCheckBox('')
+      self.rulesCon_Con_A = QCheckBox('')
       self.rulesLet_Let_A = QCheckBox('')
+      
+      # Hard rules in thrid line group box
+      self.hardRuleBox    = QGroupBox('')
+      self.hardRuleBox.setObjectName('Red')
+      self.hardRuleBox.setCheckable(True)
+      self.layoutHard     = QGridLayout()
       self.rulesDel       = QCheckBox('')
       self.rulesSwap      = QCheckBox('')
       
@@ -673,18 +691,26 @@ class App(QMainWindow):
       self.layoutRules.addWidget(self.rulesTurnSpin,  2,  1)
       self.layoutRules.addWidget(self.rulesTurnText,  2,  2)
 
-      self.layoutRules.addWidget(self.rulesVow_Vow_S, 3,  1, 1, 2)
-      self.layoutRules.addWidget(self.rulesVow_Vow_A, 4,  1, 1, 2)
+      # Easy rules widgets
+      self.layoutEasy.addWidget(self.rulesVow_Vow_S, 1, 1)
+      self.layoutEasy.addWidget(self.rulesCon_Con_S, 2, 1)
+      self.layoutEasy.addWidget(self.rulesLet_Let_S, 2, 1)
+      
+      self.layoutRules.addWidget(self.easyRuleBox,   3, 1, 1, 2)
+      self.easyRuleBox.setLayout(self.layoutEasy)
 
-      self.layoutRules.addWidget(self.rulesCon_Con_S, 5,  1, 1, 2)
-      self.layoutRules.addWidget(self.rulesCon_Con_A, 6,  1, 1, 2)
+      # Medium rules widgets
+      self.layoutMedium.addWidget(self.rulesVow_Vow_A, 1, 1)
+      self.layoutMedium.addWidget(self.rulesCon_Con_A, 2, 1)
+      self.layoutMedium.addWidget(self.rulesLet_Let_A, 3, 1)
+      
+      self.layoutRules.addWidget(self.mediumRuleBox,   4, 1, 1, 2)
+      self.mediumRuleBox.setLayout(self.layoutMedium)
 
-      self.layoutRules.addWidget(self.rulesLet_Let_S, 7,  1, 1, 2)
-      self.layoutRules.addWidget(self.rulesLet_Let_A, 8,  1, 1, 2)
-
-      self.layoutRules.addWidget(self.rulesDel,       9,  1, 1, 2)
-
-      self.layoutRules.addWidget(self.rulesSwap,      10, 1, 1, 2)
+      self.layoutHard.addWidget(self.rulesDel,     1,  1)
+      self.layoutHard.addWidget(self.rulesSwap,    2, 1)
+      self.layoutRules.addWidget(self.hardRuleBox, 5, 1, 1, 2)
+      self.hardRuleBox.setLayout(self.layoutHard)
 
       # Setting rules box layout
       self.layoutRules.setAlignment(Qt.AlignTop)
@@ -758,6 +784,20 @@ class App(QMainWindow):
        self.win.setStyleSheet(text)
        
        return True
+  
+   #############################################
+   #         Rules group boxes methods         #
+   #############################################
+   
+   def ruleCheck(self, check, obj, *args, **kwargs):
+       
+       if check:
+           print('yes')
+       elif obj is self.easyRuleBox:
+           print('no')
+           self.rulesVow_Vow_S.setEnabled(True)
+           
+       return
   
     
    ##############################################
