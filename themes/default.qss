@@ -185,6 +185,10 @@ QCheckBox {
           font: "Dyuthi";
 }
 
+QCheckBox:focus { 
+                selection-color : lavender;
+}
+
 QCheckBox::indicator {
                      height: 15px;
                      width: 15px;
@@ -198,7 +202,7 @@ QCheckBox::indicator:checked {
 
 QCheckBox::indicator:checked:hover {
                                    image : url(icons/check.png); 
-                                   background-color : ivory;
+                                   background-color : honeydew;
                                    border: 1px solid royalblue;
 }
 
@@ -208,8 +212,36 @@ QCheckBox::indicator:unchecked {
 }
 
 QCheckBox::indicator:unchecked:hover {
-                                   background-color : ivory;
+                                   background-color : honeydew;
                                    border: 1px solid royalblue;
 }
 
+
+
+QTabWidget::pane {
+                 border: 2px solid grey;
+                 background-color: ivory;
+}
+
+QTabWidget::tab-bar {
+    top: 2px;
+}
+
+QTabBar::tab {
+             border: 2px solid grey;
+             border-top-left-radius: 4px;
+             border-top-right-radius: 4px;
+             min-width: 4ex;
+             padding: 2px;
+}
+
+QTabBar::tab:selected {
+                 background: ivory;
+                 border-bottom-color: ivory;
+}
+
+QTabBar::tab:!selected {
+                  background: gainsboro;
+                  margin-top: 2px;
+}
 
