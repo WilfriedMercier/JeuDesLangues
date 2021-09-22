@@ -460,6 +460,7 @@ class App(QMainWindow):
       
       # Generate sentence button
       self.genSenButton    = QPushButton()
+      self.genSenButton.setFocusPolicy(Qt.NoFocus)
       self.genSenButton.setFlat(True)
       self.genSenButton.setIcon(self.icons['NEW'])
       self.genSenButton.setIconSize(QSize(24, 24))
@@ -467,25 +468,31 @@ class App(QMainWindow):
 
       # Sentence label
       self.senBox          = QGroupBox('')
+      self.senBox.setFocusPolicy(Qt.NoFocus)
       self.layoutSenbox    = QGridLayout()
 
       self.senLabel        = QLabel('')
+      self.senLabel.setFocusPolicy(Qt.NoFocus)
       
       # Guess label only shown when the validate button is hit
       self.guessLabel      = QLabel('')
+      self.guessLabel.setFocusPolicy(Qt.NoFocus)
       self.guessLabel.setTextFormat(Qt.RichText)
       
       # Score label
       self.scoreBox        = QGroupBox('')
       self.scoreBox.setObjectName('Score')
+      self.scoreBox.setFocusPolicy(Qt.NoFocus)
       self.layoutScore     = QGridLayout()
       
       self.scoreLabel      = QLabel('/10')
       self.scoreLabel.setObjectName('score')
+      self.scoreLabel.setFocusPolicy(Qt.NoFocus)
       self.scoreLabel.setAlignment(Qt.AlignVCenter | Qt.AlignRight)
       
       # Play button
       self.playButton      = QPushButton('')
+      self.playButton.setFocusPolicy(Qt.NoFocus)
       self.playButton.setFlat(True)
       self.playButton.setIcon(self.icons['PLAY'])
       self.playButton.setIconSize(QSize(24, 24))
@@ -494,6 +501,7 @@ class App(QMainWindow):
       
       # Treeview with groups sentences
       self.treeview        = QTreeView()
+      self.treeview.setFocusPolicy(Qt.NoFocus)
       self.model           = QStandardItemModel(0, 3)
       self.treeview.setAnimated(True)
       self.treeview.setItemsExpandable(True)
@@ -516,6 +524,7 @@ class App(QMainWindow):
       
       # Validate button
       self.validateButton  = QPushButton('')
+      self.validateButton.setFocusPolicy(Qt.NoFocus)
       self.validateButton.setFlat(True)
       self.validateButton.setIcon(self.icons['VALIDATE'])
       self.validateButton.setIconSize(QSize(24, 24))
@@ -573,6 +582,7 @@ class App(QMainWindow):
       # Top line input text
       self.inputText     = QLabel('')
       self.inputText.setObjectName('Title')
+      self.inputText.setFocusPolicy(Qt.NoFocus)
       self.inputText.setAlignment(Qt.AlignTop)
 
       # Top line input entry
@@ -586,6 +596,7 @@ class App(QMainWindow):
 
       # Top line input button
       self.inputButton    = QPushButton('')
+      self.inputButton.setFocusPolicy(Qt.NoFocus)
       self.inputButton.setIcon(self.icons['FOLDER'])
       self.inputButton.setFlat(True)
       self.inputButton.clicked.connect(self.loadCorpus)
@@ -593,6 +604,7 @@ class App(QMainWindow):
       # Second line minimum words text
       self.minwordText    = QLabel('')
       self.minwordText.setObjectName('Title')
+      self.minwordText.setFocusPolicy(Qt.NoFocus)
       self.minwordText.setAlignment(Qt.AlignTop)
 
       # Second line minimum words spinbox
@@ -604,6 +616,7 @@ class App(QMainWindow):
       # Second line maximum words text
       self.maxwordText    = QLabel('')
       self.maxwordText.setObjectName('Title')
+      self.maxwordText.setFocusPolicy(Qt.NoFocus)
       self.maxwordText.setAlignment(Qt.AlignTop)
 
       # Second line maximum words spinbox
@@ -618,6 +631,7 @@ class App(QMainWindow):
       
       # Third line group box
       self.rulesBox       = QGroupBox('')
+      self.rulesBox.setFocusPolicy(Qt.NoFocus)
       self.layoutRules    = QGridLayout()
 
       self.rulesNbGrSpin  = QSpinBox()
@@ -625,42 +639,64 @@ class App(QMainWindow):
       self.rulesNbGrSpin.setMinimum(1)
       
       self.rulesNbGrText  = QLabel('')
+      self.rulesNbGrText.setFocusPolicy(Qt.NoFocus)
 
       self.rulesTurnSpin  = QSpinBox()
       self.rulesTurnSpin.setObjectName('Type2')
       self.rulesTurnSpin.setMinimum(1)
       
       self.rulesTurnText  = QLabel('')
+      self.rulesTurnText.setFocusPolicy(Qt.NoFocus)
       
       # Easy rules in third line group box
       self.easyRuleBox    = QGroupBox('')
       self.easyRuleBox.setObjectName('Green')
+      self.easyRuleBox.setFocusPolicy(Qt.NoFocus)
       self.easyRuleBox.setCheckable(True)
       self.easyRuleBox.toggled.connect(lambda check, *args, **kwargs: self.ruleCheck(check, self.easyRuleBox, *args, **kwargs))
       self.layoutEasy     = QGridLayout()
+      
       self.rulesVow_Vow_S = QCheckBox('')
+      self.rulesVow_Vow_S.setFocusPolicy(Qt.NoFocus)
+      
       self.rulesCon_Con_S = QCheckBox('')
+      self.rulesCon_Con_S.setFocusPolicy(Qt.NoFocus)
+      
       self.rulesLet_Let_S = QCheckBox('')
+      self.rulesLet_Let_S.setFocusPolicy(Qt.NoFocus)
       
       # Medium rules in third line group box
       self.mediumRuleBox  = QGroupBox('')
       self.mediumRuleBox.setObjectName('Orange')
+      self.mediumRuleBox.setFocusPolicy(Qt.NoFocus)
       self.mediumRuleBox.setCheckable(True)
       self.layoutMedium   = QGridLayout()
+      
       self.rulesVow_Vow_A = QCheckBox('')
+      self.rulesVow_Vow_A.setFocusPolicy(Qt.NoFocus)
+      
       self.rulesCon_Con_A = QCheckBox('')
+      self.rulesCon_Con_A.setFocusPolicy(Qt.NoFocus)
+      
       self.rulesLet_Let_A = QCheckBox('')
+      self.rulesLet_Let_A.setFocusPolicy(Qt.NoFocus)
       
       # Hard rules in thrid line group box
       self.hardRuleBox    = QGroupBox('')
       self.hardRuleBox.setObjectName('Red')
+      self.hardRuleBox.setFocusPolicy(Qt.NoFocus)
       self.hardRuleBox.setCheckable(True)
       self.layoutHard     = QGridLayout()
+      
       self.rulesDel       = QCheckBox('')
+      self.rulesDel.setFocusPolicy(Qt.NoFocus)
+      
       self.rulesSwap      = QCheckBox('')
+      self.rulesSwap.setFocusPolicy(Qt.NoFocus)
       
       # Fourth line save button
       self.saveButton      = QPushButton('')
+      self.saveButton.setFocusPolicy(Qt.NoFocus)
       self.saveButton.setFlat(True)
       self.saveButton.setIcon(self.icons['SAVE'])
       self.saveButton.setIconSize(QSize(24, 24))
