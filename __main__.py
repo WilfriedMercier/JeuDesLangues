@@ -244,7 +244,7 @@ class App(QMainWindow):
          # Show application
          self.setCentralWidget(self.win)
          self.resize(800, 800)
-         self.setTheme('default')
+         self.setTheme('dark')
          self.centre()
          self.show()
       
@@ -730,7 +730,7 @@ class App(QMainWindow):
       # Easy rules widgets
       self.layoutEasy.addWidget(self.rulesVow_Vow_S, 1, 1)
       self.layoutEasy.addWidget(self.rulesCon_Con_S, 2, 1)
-      self.layoutEasy.addWidget(self.rulesLet_Let_S, 2, 1)
+      self.layoutEasy.addWidget(self.rulesLet_Let_S, 3, 1)
       
       self.layoutRules.addWidget(self.easyRuleBox,   3, 1, 1, 2)
       self.easyRuleBox.setLayout(self.layoutEasy)
@@ -825,15 +825,41 @@ class App(QMainWindow):
    #         Rules group boxes methods         #
    #############################################
    
-   def ruleCheck(self, check, obj, *args, **kwargs):
+   def ruleCheck(self, check: bool, obj: QCheckBox, *args, **kwargs) -> None:
+      '''
+      Check or uncheck correctly the child widgets for the given groupBox.
+      
+      :param bool check: whether the checkbox is checked or unchecked
+      :param QCheckBox obj: object which is checked
+      '''
        
-       if check:
-           print('yes')
-       elif obj is self.easyRuleBox:
-           print('no')
-           self.rulesVow_Vow_S.setEnabled(True)
-           
-       return
+      if obj is self.easyRuleBox:
+         
+         for widget in [self.rulesVow_Vow_S, self.rulesCon_Con_S, self.rulesLet_Let_S]:
+            if check:
+               widget.setCheckState(Qt.Checked)
+            else:
+               widget.setCheckState(Qt.Unchecked)
+               widget.setEnabled(True)
+               
+      elif obj is self.mediumRuleBox:
+         
+         for widget in [self.rulesVow_Vow_A, self.rulesCon_Con_A, self.rulesLet_Let_A]:
+            if check:
+               widget.setCheckState(Qt.Checked)
+            else:
+               widget.setCheckState(Qt.Unchecked)
+               widget.setEnabled(True)
+               
+      elif obj is self.hardRuleBox:
+         for widget in [self.rulesSwap, self.rulesDel]:
+            if check:
+               widget.setCheckState(Qt.Checked)
+            else:
+               widget.setCheckState(Qt.Unchecked)
+               widget.setEnabled(True)
+               
+      return
   
     
    ##############################################
