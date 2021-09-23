@@ -1,0 +1,259 @@
+QMainWindow { 
+            background: #19232D;
+}
+
+
+
+
+QWidget {
+        color: white;
+        background: #19232D;
+}
+
+QWidget#Main { 
+             border-bottom: 3px solid qlineargradient(x1:0 y1:0, x2:1 y2:0, stop:0 #7a295e, stop:0.1 #DB1B2F, stop:0.9 #DB1B2F, stop:1 #ee8621);
+             border-left:   3px solid qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 #7a295e, stop:0.1 #2c3484, stop:0.9 #2c3484, stop:1 #7a295e);
+             border-right:  3px solid qlineargradient(x1:0 y1:0, x2:0 y2:1, stop:0 #ee8621, stop:0.1 #fac718, stop:0.9 #fac718, stop:1 #ee8621);
+             border-top:    3px solid qlineargradient(x1:0 y1:0, x2:1 y2:0, stop:0 #7a295e, stop:0.1 #DB1B2F, stop:0.9 #DB1B2F, stop:1 #FAC718);
+}
+
+QWidget#Tab { 
+            background: #32414B;
+}
+
+
+
+
+QGroupBox { 
+          border: 2px solid grey; 
+          border-radius: 15px; 
+          margin-top: 1.3ex; 
+          background-color: #19232D;
+          font-size: 16px; 
+          font: bold "Dyuthi";
+          color: white;
+}
+
+QGroupBox::title { 
+                 subcontrol-origin: margin; 
+                 padding: 0 3px; 
+                 left: 0.5ex
+}
+
+QGroupBox::indicator:checked { 
+                             image : url(icons/check.png); 
+                             background-color : #32414B;
+                             border: 1px solid grey;
+}
+
+QGroupBox::indicator:unchecked {
+                               background-color : #32414B;
+                               border: 1px solid grey;
+}
+
+QGroupBox::indicator:unchecked:hover {
+                                     background-color : #32414B;
+                                     border: 1px solid royalblue;
+}
+
+
+QGroupBox#Green {
+                color: green
+}
+
+QGroupBox#Orange {
+                 color: orange
+}
+
+QGroupBox#Red {
+              color: red
+}
+
+QGroupBox#Score { 
+                border: 2px solid grey; 
+                border-radius: 15px; 
+                margin-top: 1.3ex; 
+                background-color: #19232D;
+                color: white;
+}
+
+QGroupBox::title#Score { 
+                       subcontrol-origin: margin; 
+                       padding: 0 3px; 
+                       left: 0.5ex;
+}
+
+
+
+QLabel {
+       background: transparent;
+       font-size: 16px; 
+       font: "Dyuthi";
+       color: white;
+}
+
+QLabel#Title {
+             background: transparent;
+             font-size: 16px; 
+             font: bold "Dyuthi";
+             color: white;
+}
+
+QLabel#score { 
+             background: transparent; 
+             font-size: 24px; 
+             font: bold italic "Dyuthi";
+             color: white;
+}
+
+
+
+QLineEdit { 
+          background: #19232D; 
+          border: 2px solid grey; 
+          border-radius: 10px;
+          font-size: 16px; 
+          font: "Dyuthi";
+          color: white;
+}
+
+QLineEdit:hover {
+                border-color: royalblue;
+}
+
+QLineEdit:focus {
+                 border-color: royalblue;
+}
+
+
+
+QTreeView {
+          background: #19232D; 
+          border: 2px solid grey; 
+          border-radius: 10px;
+          color: white;
+}
+
+QHeaderView {
+            border: 1px solid transparent; 
+            border-bottom: 2px solid grey;
+            background-color: rgba(255, 255, 255, 0);
+} 
+
+QHeaderView::section {
+                     background-color: rgba(255, 255, 255, 0);
+                     border: 1px solid transparent;
+                     font-size: 16px; 
+                     font: bold "Dyuthi";
+                     color: white;
+}
+
+
+QSpinBox {
+         border: 2px solid grey;
+         font-size: 16px; 
+         font: "Dyuthi";
+         color: white;
+}
+
+QSpinBox::up-arrow {
+                   border-image: url(icons/up_arrow.png);
+}
+
+QSpinBox::down-arrow {
+                     border-image: url(icons/down_arrow.png);
+}
+
+QSpinBox::up-arrow:off {}
+
+QSpinBox::down-arrow:off {}
+
+
+
+
+QSpinBox:hover {
+               border-color: royalblue;
+}
+
+QSpinBox:focus {
+               border-color: royalblue;
+}
+
+QSpinBox#Type1 {
+               background: #19232D;
+}
+
+QSpinBox#Type2 {
+               background: #32414B;
+}
+
+
+
+
+QCheckBox {
+          font-size: 16px;
+          font: "Dyuthi";
+          color: white;
+}
+
+QCheckBox:focus { 
+                selection-color : #19232D;
+}
+
+QCheckBox::indicator {
+                     height: 15px;
+                     width: 15px;
+}
+
+QCheckBox::indicator:checked { 
+                              image : url(icons/check.png); 
+                              background-color : #32414B;
+                              border: 1px solid grey;
+}
+
+QCheckBox::indicator:checked:hover {
+                                   image : url(icons/check.png); 
+                                   background-color : honeydew;
+                                   border: 1px solid royalblue;
+}
+
+QCheckBox::indicator:unchecked {
+                               background-color : #32414B;
+                               border: 1px solid grey;
+}
+
+QCheckBox::indicator:unchecked:hover {
+                                   background-color : honeydew;
+                                   border: 1px solid royalblue;
+}
+
+
+
+QTabWidget::pane {
+                 border: 2px solid grey;
+                 background-color: #32414B;
+                 color: white;
+}
+
+QTabWidget::tab-bar {
+    top: 2px;
+}
+
+QTabBar::tab {
+             border: 2px solid grey;
+             border-top-left-radius: 4px;
+             border-top-right-radius: 4px;
+             min-width: 4ex;
+             padding: 2px;
+}
+
+QTabBar::tab:selected {
+                 background: #32414B;
+                 border-bottom-color: #32414B;
+}
+
+QTabBar::tab:!selected {
+                  background: #222B35;
+                  margin-top: 2px;
+}
+
