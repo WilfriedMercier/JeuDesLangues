@@ -10,6 +10,8 @@ import random
 import os
 import os.path               as     opath
 
+from   typing                import List, Optional, Any
+
 from   PyQt5.QtWidgets       import QFrame, QMainWindow, QApplication, QMenuBar, QAction, QDesktopWidget, QWidget, QLineEdit, QLabel, QPushButton, QGridLayout, QVBoxLayout, QFileDialog, QShortcut, QTabWidget, QSpinBox, QGroupBox, QCheckBox, QTreeView, QAbstractItemView, QStatusBar, QSplashScreen
 from   PyQt5.QtCore          import Qt, pyqtSlot, QSize, QEventLoop, QFile, QIODevice, QTextStream
 from   PyQt5.QtGui           import QKeySequence, QPalette, QColor, QStandardItemModel, QStandardItem, QFont, QPixmap, QIcon
@@ -19,13 +21,19 @@ import backend               as     bkd
 import backend.sentences     as     snt
 
 class App(QMainWindow):
-   '''Main application.'''
+   r'''Main application.'''
 
-   def __init__(self, root, iconsPath='icons', *args, **kwargs):
-      '''Initialise the application.'''
+   def __init__(self, root: QApplication, iconsPath: str = 'icons', **kwargs) -> None:
+      r'''
+      Initialise the application.
+      
+      :param QApplication root: root object
+      
+      :param str iconsPath: (**Optional**) path where to find the icons
+      '''
 
       self.root               = root
-      super().__init__()
+      super().__init__(**kwargs)
 
       # Script current dir
       self.scriptDir          = opath.dirname(opath.realpath(__file__))
@@ -131,6 +139,11 @@ class App(QMainWindow):
          self.okColorName    = 'darkgreen'
          green               = QColor(self.okColorName)
          self.okPalette.setColor(QPalette.Text, green)
+         
+         self.medPalette     = QPalette()
+         self.medColorName   = 'darkorange'
+         orange              = QColor(self.medColorName)
+         self.medPalette.setColor(QPalette.Text, orange)
    
          self.errorPalette   = QPalette()
          self.errorColorName = 'firebrick'
@@ -150,12 +163,12 @@ class App(QMainWindow):
          # Game layout
          self.splashlabel.setText('Drawing game tab...')
          self.root.processEvents()
-         self.gameTabWidgets    = self._makeLayoutGame()
+         self._makeLayoutGame()
    
          # Settings layout
          self.splashlabel.setText('Drawing settings tab...')
          self.root.processEvents()
-         self.settingTabWidgets = self._makeLayoutSettings()
+         self._makeLayoutSettings()
          
          # Setup settings widgets state
          self.splashlabel.setText('Setup default settings...')
@@ -281,8 +294,8 @@ class App(QMainWindow):
    #         Mapping interface translation to objects and commands         #
    #########################################################################
       
-   def _setupTranslation(self, *args, **kwargs):
-      '''Setup the translation properties. Must only be run once at startup.'''
+   def _setupTranslation(self, *args, **kwargs) -> None:
+      r'''Setup the translation properties. Must only be run once at startup.'''
       
       # These map names appearing in the translation file with Qt method names
       self.setMethods = {'tooltip' : 'setToolTip',
@@ -294,8 +307,8 @@ class App(QMainWindow):
       return
    
    
-   def applyTranslation(self, objName, methodName, values):
-      '''
+   def applyTranslation(self, objName: str, methodName: str, values: List) -> int:
+      r'''
       Apply a translation to an object using the setMethods dict.
       
       :param str objName: oject name as appearing in the translation file
@@ -325,15 +338,15 @@ class App(QMainWindow):
       
       return 0
    
-   def translate(self, newTransName, *args, **kwargs):
-      '''
+   def translate(self, newTransName: str, *args, **kwargs) -> None:
+      r'''
       Translate the interface using the currently loaded translation file.
       
       :param str newTransName: name of the new translation. If None or if similar to previous translation, no change is applied.
       '''
       
-      def check(obj, method, val):
-         '''
+      def check(obj: QWidget, method, val: List) -> None:
+         r'''
          Apply translation and check that nothing went wrong.
 
          :param obj: object to apply the translation to
@@ -349,11 +362,11 @@ class App(QMainWindow):
                   
          # This error should never be raised in theory
          if err == -2:
-            raise AttributeError('Method %s could not be found in object %s.' %(method, obj))
+            raise AttributeError(f'Method {method} could not be found in object {obj}.')
             
          # This means we are dealing with objects which are not attributes
          elif err == -1:
-            raise AttributeError('Object %s could not be found.' %obj) 
+            raise AttributeError(f'Object {obj} could not be found.') 
             
          return
       
@@ -413,7 +426,7 @@ class App(QMainWindow):
             
             # Check that a tranlation was found
             if not ok:
-               raise IOError('No translation %s was found in translation files list %s' %(newTransName, self.translations))
+               raise IOError(f'No translation {newTransName} was found in translation files list {self.translations}.')
                
             # Loop through objects
             for obj, value in self.trans_prop.items():
@@ -465,7 +478,7 @@ class App(QMainWindow):
                   check(obj, method, val)
                   self.currentTrans    = transNameNoSuffix
       
-            self.statusbar.showMessage('Translated interface to %s' %self.currentTrans)
+            self.statusbar.showMessage(f'Translated interface to {self.currentTrans}')
    
       return
                
@@ -474,8 +487,8 @@ class App(QMainWindow):
    #          Layout methods          #
    ####################################
 
-   def _makeLayoutGame(self, *args, **kwargs):
-      '''
+   def _makeLayoutGame(self, *args, **kwargs) -> None:
+      r'''
       Make the layout for the game tab.
       
       :returns: list of widgets belonging to this tab (used for theming only)
@@ -597,11 +610,10 @@ class App(QMainWindow):
       self.layoutMain.setColumnStretch(4, 1)
       self.layoutMain.setColumnStretch(2, 10)
 
-      return [self.genSenButton, self.senBox, self.senLabel, self.guessLabel, self.scoreBox, self.scoreLabel, 
-              self.playButton, self.treeview, self.guessEntry, self.validateButton]
+      return
 
-   def _makeLayoutSettings(self, *args, **kwargs):
-      '''Make the layout for the settings tab.'''
+   def _makeLayoutSettings(self, *args, **kwargs) -> None:
+      r'''Make the layout for the settings tab.'''
 
       #####################
       #      Widgets      #
@@ -799,7 +811,7 @@ class App(QMainWindow):
       self.tabSettings.setLayout(self.layoutSettings)
       self.tabs.addTab(self.tabSettings, "&Settings")
 
-      return []
+      return
   
     
    #####################################
@@ -827,18 +839,7 @@ class App(QMainWindow):
        stream.open(QIODevice.ReadOnly)
        text   = QTextStream(stream).readAll()
    
-       # Go through widgets in the game tab       
-       for widget in self.gameTabWidgets:
-           widget.setStyleSheet(text)
-       
-       # Go through widgets in the settings tab
-       for widget in self.settingTabWidgets:
-           widget.setStyleSheet(text)
-           
-       # Set style onto main widgets
-       self.tabMain.setStyleSheet(text) 
-       self.tabSettings.setStyleSheet(text)
-       self.tabs.setStyleSheet(text)
+       # Go through widgets in the game tab    
        self.win.setStyleSheet(text)
        
        # Save theme
@@ -893,8 +894,8 @@ class App(QMainWindow):
    #          Treeview related methods          #
    ##############################################
    
-   def addLine(self, name, turn, sentence):
-       '''
+   def addLine(self, name: str, turn: int, sentence: str) -> None:
+       r'''
        Add a line to the treeview.
 
        :param str name: name of the group
@@ -909,7 +910,7 @@ class App(QMainWindow):
        name     = QStandardItem(name)
        name.setTextAlignment(Qt.AlignHCenter)
        
-       turn     = QStandardItem('%d' %turn)
+       turn     = QStandardItem(f'{turn:d}')
        turn.setTextAlignment(Qt.AlignHCenter)
        
        sentence = QStandardItem(sentence)
@@ -926,8 +927,8 @@ class App(QMainWindow):
    #           Game related methods           #
    ############################################
 
-   def newSentence(self, *args, **kwargs):
-      '''Actions taken when the new sentence button is pressed.'''
+   def newSentence(self, *args, **kwargs) -> None:
+      r'''Actions taken when the new sentence button is pressed.'''
 
       # Update sentence
       self.sentence, self.words, nb = snt.pick_sentence(self.corpusText, self.minwordSpin.value(), self.maxwordSpin.value())
@@ -944,7 +945,7 @@ class App(QMainWindow):
       else:
           word                      = self.trans_prop['word']['plural']
           
-      self.senBox.setTitle('%s - %d %s' %(self.trans_prop['senBox']['title'], nb, word))
+      self.senBox.setTitle(f"{self.trans_prop['senBox']['title']} - {nb:d} {word}")
       self.resetGame()
       
       # Extract vowels and consonants from sentence
@@ -953,8 +954,8 @@ class App(QMainWindow):
       return
   
     
-   def resetGame(self, *args, **kwargs):
-       '''Reset the interface and properties related to the game.'''
+   def resetGame(self, *args, **kwargs) -> None:
+       r'''Reset the interface and properties related to the game.'''
        
        # Clear treeview
        self.model.removeRows(0, self.model.rowCount())
@@ -973,12 +974,12 @@ class App(QMainWindow):
        return
   
     
-   def startGame(self, *args, **kwargs):
-       '''Start the game.'''
+   def startGame(self, *args, **kwargs) -> None:
+       r'''Start the game.'''
        
        # Create as many groups as necessary
        nbGroups     = self.rulesNbGrSpin.value()
-       groups       = [bkd.LanguageGroup(self.sentence, self.language, self.vowels, self.consonants, idd='%s %d' %(self.trans_prop['model']['headers'][0], i)) for i in range(1, nbGroups+1)]
+       groups       = [bkd.LanguageGroup(self.sentence, self.language, self.vowels, self.consonants, idd=f"{self.trans_prop['model']['headers'][0]} {i:d}") for i in range(1, nbGroups+1)]
        
        # Loop through each turn
        nbTurns      = self.rulesTurnSpin.value()
@@ -1018,14 +1019,14 @@ class App(QMainWindow):
        return
    
     
-   def setScore(self, score, *args, **kwargs):
-       '''
+   def setScore(self, score: float, *args, **kwargs) -> None:
+       r'''
        Set the score.
 
        :param float score: score
        '''
        
-       strScore     = '%.1f' %score
+       strScore     = f'{score:.1f}'
        if strScore[-2:] == '.0':
            strScore = strScore[:-2]
        
@@ -1040,8 +1041,8 @@ class App(QMainWindow):
        return
    
     
-   def validateGame(self, *args, **kwargs):
-       '''Actions taken when the validate button is hit.'''
+   def validateGame(self, *args, **kwargs) -> None:
+       r'''Actions taken when the validate button is hit.'''
        
        # User sentence split in words, but keeping characters such as ,
        sentence                      = self.guessEntry.text()
@@ -1092,8 +1093,8 @@ class App(QMainWindow):
    #           Corpus related methods          #
    #############################################
 
-   def _changeCorpusEntry(self, name, *args, **kwargs):
-      '''
+   def _changeCorpusEntry(self, name: str, *args, **kwargs) -> None:
+      r'''
       Change the corpus entry widget value.
 
       :param str name: corpus name
@@ -1102,8 +1103,8 @@ class App(QMainWindow):
       self.inputEntry.setText(name)
       return
 
-   def _updateCorpusProp(self, file, *args, **kwargs):
-      '''
+   def _updateCorpusProp(self, file: str, *args, **kwargs) -> None:
+      r'''
       Update corpus properties.
 
       :param str file: file name to retrieve the text from
@@ -1120,14 +1121,18 @@ class App(QMainWindow):
 
       return
 
-   def errorCorpus(self, *args, **kwargs):
-      '''Fonction called when the corpus file is not ok.'''
+   def errorCorpus(self, *args, **kwargs) -> None:
+      r'''Fonction called when the corpus file is not ok.'''
 
       self.inputEntry.setPalette(self.errorPalette)
       return
 
-   def checkAndLoadCorpus(self, file, *args, **kwargs):
-      '''Check that a corpus file and load it if it is fine.'''
+   def checkAndLoadCorpus(self, file: str, *args, **kwargs) -> None:
+      r'''
+      Check that a corpus file and load it if it is fine.
+      
+      :param str file: corpus file to load
+      '''
 
       if opath.isfile(file) and file.split('.')[-1]:
          self._updateCorpusProp(file)
@@ -1138,10 +1143,8 @@ class App(QMainWindow):
       return
 
    @pyqtSlot()
-   def loadCorpus(self, *args, **kwargs):
-      '''
-      Slot used to load a new corpus file.
-      '''
+   def loadCorpus(self, *args, **kwargs) -> None:
+      r'''Slot used to load a new corpus file.'''
 
       corpus = self.selectCorpus(*args, **kwargs)
 
@@ -1155,17 +1158,17 @@ class App(QMainWindow):
 
       return
 
-   def okCorpus(self, *args, **kwargs):
-      '''Fonction called when the corpus file is ok.'''
+   def okCorpus(self, *args, **kwargs) -> None:
+      r'''Fonction called when the corpus file is ok.'''
 
       self.inputEntry.setPalette(self.okPalette)
       return
 
-   def selectCorpus(self, *args, **kwargs):
-      '''
+   def selectCorpus(self, *args, **kwargs) -> Optional[str]:
+      r'''
       Generate a window to select a corpus text file.
 
-      :rtype: file name if ok, None otherwise
+      :returns: file name if ok, None otherwise
       :rtype: str if ok, None otherwise
       '''
 
@@ -1184,25 +1187,33 @@ class App(QMainWindow):
    #          Number of words         #
    ####################################
 
-   def _minimumWordsChanged(self, value, *args, **kwargs):
-      '''Actions taken when the minimum number of words changed.'''
+   def _minimumWordsChanged(self, value: int, *args, **kwargs) -> None:
+      r'''
+      Actions taken when the minimum number of words changed.
+      
+      :param int value: value
+      '''
 
       if value == 1:
-         self.minwordSpin.setSuffix(' %s' %self.trans_prop['minwordSpin']['suffix']['singular'])
+         self.minwordSpin.setSuffix(f" {self.trans_prop['minwordSpin']['suffix']['singular']}")
       else:
-         self.minwordSpin.setSuffix(' %s' %self.trans_prop['minwordSpin']['suffix']['plural'])
+         self.minwordSpin.setSuffix(f" {self.trans_prop['minwordSpin']['suffix']['plural']}")
 
       self.maxwordSpin.setMinimum(value)
       return
 
 
-   def _maximumWordsChanged(self, value, *args, **kwargs):
-      '''Actions taken when the maximum number of words changed.'''
+   def _maximumWordsChanged(self, value: int, *args, **kwargs) -> None:
+      r'''
+      Actions taken when the maximum number of words changed.
+      
+      :param int value: value
+      '''
 
       if value == 1:
-         self.maxwordSpin.setSuffix(' %s' %self.trans_prop['maxwordSpin']['suffix']['singular'])
+         self.maxwordSpin.setSuffix(f" {self.trans_prop['maxwordSpin']['suffix']['singular']}")
       else:
-         self.maxwordSpin.setSuffix(' %s' %self.trans_prop['maxwordSpin']['suffix']['plural'])
+         self.maxwordSpin.setSuffix(f" {self.trans_prop['maxwordSpin']['suffix']['plural']}")
       
       self.minwordSpin.setMaximum(value)
       return
@@ -1212,8 +1223,8 @@ class App(QMainWindow):
    #          Miscellaneous         #
    ##################################
 
-   def centre(self, *args, **kwargs):
-      '''Centre the window.'''
+   def centre(self, *args, **kwargs) -> None:
+      r'''Centre the window.'''
 
       frameGm     = self.frameGeometry()
       screen      = self.root.desktop().screenNumber(self.root.desktop().cursor().pos())
@@ -1225,8 +1236,8 @@ class App(QMainWindow):
 
       return
 
-   def checkFile(self, file, *args, **kwargs):
-      '''
+   def checkFile(self, file: str, *args, **kwargs) -> bool:
+      r'''
       Check that the given file exists.
 
       :param str file: file to check
@@ -1240,8 +1251,12 @@ class App(QMainWindow):
       else:
          return False
      
-   def guessEdited(self, text, *args, **kwargs):
-       '''Actions taken when the guess is edited.'''
+   def guessEdited(self, text: str, *args, **kwargs) -> None:
+       r'''
+       Actions taken when the guess is edited.
+       
+       :param str text: text
+       '''
        
        if text != '':
            self.validateButton.setEnabled(True)
@@ -1250,8 +1265,8 @@ class App(QMainWindow):
            
        return
    
-   def setBadText(self, text, *args, **kwargs):
-       '''
+   def setBadText(self, text: str, *args, **kwargs) -> str:
+       r'''
        Transform a text into rich text with a red color.
 
        :param str text: plain text
@@ -1260,10 +1275,10 @@ class App(QMainWindow):
        :rtype: str
        '''
        
-       return '<font color="%s">%s</font>' %(self.errorColorName, text)
+       return f'<font color="{self.errorColorName}">{text}</font>'
    
-   def setMediumText(self, text, *args, **kwargs):
-       '''
+   def setMediumText(self, text: str, *args, **kwargs) -> str:
+       r'''
        Transform a text into rich text with an orange color.
 
        :param str text: plain text
@@ -1272,10 +1287,10 @@ class App(QMainWindow):
        :rtype: str
        '''
        
-       return '<font color="darkorange">%s</font>' %text
+       return f'<font color="{self.medColorName}">{text}</font>'
 
-   def setOkText(self, text, *args, **kwargs):
-       '''
+   def setOkText(self, text, *args, **kwargs) -> str:
+       r'''
        Transform a text into rich text with a green color.
 
        :param str text: plain text
@@ -1284,15 +1299,15 @@ class App(QMainWindow):
        :rtype: str
        '''
        
-       return '<font color="%s">%s</font>' %(self.okColorName, text)
+       return f'<font color="{self.okColorName}">{text}</font>'
 
 
    ############################################################
    #            Settings and rules related methods            #
    ############################################################
    
-   def _setupSettings(self, *args, **kwargs):
-      '''Setup the settings at startup.'''
+   def _setupSettings(self, *args, **kwargs) -> None:
+      r'''Setup the settings at startup.'''
       
       for which, values in self.rules.items():
          for setting, value in values.items():
@@ -1303,9 +1318,9 @@ class App(QMainWindow):
             ret       = self.setSetting(obj, method, val)
             
             if ret == -1:
-               raise AttributeError('Object %s not found.' %objName)
+               raise AttributeError(f'Object {objName} not found.')
             elif ret == -2:
-               raise AttributeError('Method %s in object %s not found.' %(method, objName))
+               raise AttributeError(f'Method {method} in object {objName} not found.')
                
       # Modify rules to be correctly by methods later on (rules layout from conf file is saved in another variable)
       self._confRules = copy.deepcopy(self.rules)
@@ -1315,8 +1330,8 @@ class App(QMainWindow):
             
       return
    
-   def saveSettings(self, *args, **kwargs):
-       '''Actions taken when settings are saved.'''
+   def saveSettings(self, *args, **kwargs) -> None:
+       r'''Actions taken when settings are saved.'''
        
        # Gather data necessary to save settings
        corpus      = self.corpusName
@@ -1339,11 +1354,14 @@ class App(QMainWindow):
        
        return
 
-   def setRule(self, which=None, **kwargs):
-      '''
+   def setRule(self, which: str = None, **kwargs) -> None:
+      r'''
       Set a rule with the given value. Function should be called as follows
 
-      ... self.setRule(someRule = someValue, which='Other_rule')
+      >>> self.setRule(someRule = someValue, which='Other_rule')
+      
+      :param str which: (**Optional**) which rule to set
+      
       '''
       
       if which is None:
@@ -1357,12 +1375,12 @@ class App(QMainWindow):
 
       return
    
-   def setSetting(self, objName, methodName, value):
+   def setSetting(self, objName: str, methodName: str, value: Any) -> int:
       '''
       Set settings widget with the given value.
 
-      :param objName: object to update
-      :param methodName: method to apply to the object
+      :param str objName: object to update
+      :param str methodName: method to apply to the object
       :param value: value to put into the object
       '''
       
