@@ -6,7 +6,7 @@ QMainWindow {
 
 
 QWidget {
-        color: white;
+        color: azure;
         background: #19232D;
 }
 
@@ -31,7 +31,7 @@ QGroupBox {
           background-color: #19232D;
           font-size: 16px; 
           font: bold "Dyuthi";
-          color: white;
+          color: azure;
 }
 
 QGroupBox::title { 
@@ -74,7 +74,7 @@ QGroupBox#Score {
                 border-radius: 15px; 
                 margin-top: 1.3ex; 
                 background-color: #19232D;
-                color: white;
+                color: azure;
 }
 
 QGroupBox::title#Score { 
@@ -89,21 +89,21 @@ QLabel {
        background: transparent;
        font-size: 16px; 
        font: "Dyuthi";
-       color: white;
+       color: azure;
 }
 
 QLabel#Title {
              background: transparent;
              font-size: 16px; 
              font: bold "Dyuthi";
-             color: white;
+             color: azure;
 }
 
 QLabel#score { 
              background: transparent; 
              font-size: 24px; 
              font: bold italic "Dyuthi";
-             color: white;
+             color: azure;
 }
 
 
@@ -114,7 +114,7 @@ QLineEdit {
           border-radius: 10px;
           font-size: 16px; 
           font: "Dyuthi";
-          color: white;
+          color: azure;
 }
 
 QLineEdit:hover {
@@ -131,7 +131,7 @@ QTreeView {
           background: #19232D; 
           border: 2px solid grey; 
           border-radius: 10px;
-          color: white;
+          color: azure;
 }
 
 QHeaderView {
@@ -145,7 +145,7 @@ QHeaderView::section {
                      border: 1px solid transparent;
                      font-size: 16px; 
                      font: bold "Dyuthi";
-                     color: white;
+                     color: azure;
 }
 
 
@@ -153,7 +153,7 @@ QSpinBox {
          border: 2px solid grey;
          font-size: 16px; 
          font: "Dyuthi";
-         color: white;
+         color: azure;
 }
 
 QSpinBox::up-arrow {
@@ -193,7 +193,7 @@ QSpinBox#Type2 {
 QCheckBox {
           font-size: 16px;
           font: "Dyuthi";
-          color: white;
+          color: azure;
 }
 
 QCheckBox:focus { 
@@ -223,8 +223,8 @@ QCheckBox::indicator:unchecked {
 }
 
 QCheckBox::indicator:unchecked:hover {
-                                   background-color : honeydew;
-                                   border: 1px solid royalblue;
+                                     background-color : honeydew;
+                                     border: 1px solid royalblue;
 }
 
 
@@ -232,11 +232,11 @@ QCheckBox::indicator:unchecked:hover {
 QTabWidget::pane {
                  border: 2px solid grey;
                  background-color: #32414B;
-                 color: white;
+                 color: azure;
 }
 
 QTabWidget::tab-bar {
-    top: 2px;
+                    top: 2px;
 }
 
 QTabBar::tab {
@@ -248,12 +248,12 @@ QTabBar::tab {
 }
 
 QTabBar::tab:selected {
-                 background: #32414B;
-                 border-bottom-color: #32414B;
+                      background: #32414B;
+                      border-bottom-color: #32414B;
 }
 
 QTabBar::tab:!selected {
-                  background: #222B35;
-                  margin-top: 2px;
+                       background: #222B35;
+                       margin-top: 2px;
 }
 

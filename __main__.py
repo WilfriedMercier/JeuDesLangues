@@ -98,6 +98,10 @@ class App(QMainWindow):
          self.currentTrans   = None
          self.trans_prop     = conf['trans_prop']
          self.old_trans_prop = None
+         
+         # Interface theme
+         self.theme          = opath.basename(conf['theme']).rsplit('.qss', maxsplit=1)[0]
+         self.themes         = conf['themes']
    
          self.splashlabel.setText('Setting interface...')
          self.root.processEvents()
@@ -204,7 +208,7 @@ class App(QMainWindow):
          self.treeview.header().setDefaultAlignment(Qt.AlignHCenter)
          self.treeview.header().resizeSection(0, 100)
          self.treeview.header().resizeSection(1, 50)
-   
+         
    
          ###############################################
          #               Setup shortcuts               #
@@ -220,6 +224,9 @@ class App(QMainWindow):
          self.shortcuts['Ctrl+P'] = QShortcut(QKeySequence('Ctrl+P'), self.tabMain)
          self.shortcuts['Ctrl+P'].activated.connect(self.startGame)
          
+         self.shortcuts['Ctrl+S'] = QShortcut(QKeySequence('Ctrl+S'), self.tabSettings)
+         self.shortcuts['Ctrl+S'].activated.connect(self.saveSettings)
+         
    
          ############################
          #           Menu           #
@@ -229,22 +236,43 @@ class App(QMainWindow):
          self.root.processEvents()
       
          menubar           = self.menuBar()
-         transmenu         = menubar.addMenu('&Interface')
          
          # Setup actions given the languages found
+         transmenu         = menubar.addMenu('&Interface')
+         
          for t in self.translations:
              tbase         = opath.basename(t)
-             action        = QAction('&%s' %tbase.split('.yaml')[0], self)
+             action        = QAction(f'&{tbase.split(".yaml")[0]}', self)
              action.triggered.connect(lambda *args, x=tbase: self.translate(x))
              
              transmenu.addAction(action)
+         
+         # Setup actions for the theme
+         thememenu         = menubar.addMenu('&Theme')
+         
+         for t in self.themes:
+             tbase         = opath.basename(t).rsplit(".qss", maxsplit=1)[0]
+             action        = QAction(f'&{tbase}', self)
+             action.triggered.connect(lambda *args, x=tbase: self.setTheme(x))
+             
+             thememenu.addAction(action)
+             
+
+         ###########################################
+         #               Apply theme               #
+         ###########################################
+         
+         self.splashlabel.setText('Setting menu...')
+         self.root.processEvents()
+         
+         self.setTheme(self.theme)
+            
       finally:
          self.splash.finish(self)
 
          # Show application
          self.setCentralWidget(self.win)
          self.resize(800, 800)
-         self.setTheme('dark')
          self.centre()
          self.show()
       
@@ -778,25 +806,19 @@ class App(QMainWindow):
    #          Interface theme          #
    #####################################
    
-   def setTheme(self, theme, *args, **kwargs):
-       '''
+   def setTheme(self, theme: str, *args, **kwargs) -> bool:
+       r'''
        Set the given theme (defined in __init__) to the interface.
 
        :param str theme: theme to apply to the interface
 
        :returns: True if the theme exists, False otherwise
        :rtype: bool
-       
-       :raises TypeError: if **theme** is not of type str
        '''
-       
-       if not isinstance(theme, str):
-           raise TypeError(f'theme parameter has type {type(theme)} but it must be of type str.')
        
        # Need to test whether the file exists
        file   = opath.join('themes', f'{theme}.qss')
        if not opath.isfile(file):
-           print(file)
            self.statusbar.showMessage(f'Could not load {theme} theme from theme directory. Theme not found.')
            return False
            
@@ -819,6 +841,11 @@ class App(QMainWindow):
        self.tabs.setStyleSheet(text)
        self.win.setStyleSheet(text)
        
+       # Save theme
+       self.theme = theme
+       self.saveButton.setEnabled(True)
+       
+       self.statusbar.showMessage(f'Successfully loaded theme {theme}.')
        return True
   
    #############################################
@@ -1297,13 +1324,14 @@ class App(QMainWindow):
        language    = self.languageName
        alterations = self.langAlteration
        rules       = self._confRules
+       theme       = self.theme
        
        # Need to update the rules according to the state of each rule in self.rules dict
        for which, values in self.rules.items():
           for item, value in values.items():
              rules[which][item]['value'] = value
        
-       bkd.saveConfig('configuration.yaml', corpus=corpus, interface=interface, language=language, alterations=alterations, rules=rules)
+       bkd.saveConfig('configuration.yaml', corpus=corpus, interface=interface, language=language, alterations=alterations, rules=rules, theme=f'{theme}.qss')
           
        # Grey out save icon
        self.saveButton.setEnabled(False)

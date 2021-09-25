@@ -6,26 +6,28 @@ import os.path           as     opath
 from   functools         import reduce
 from   glob              import glob
 from   copy              import deepcopy
+from   typing            import Union, List, Optional, Any
 from   PyQt5.QtGui       import QIcon, QPixmap
 
 # Custom imports
 import backend.sentences as     sen
 
 class LanguageGroup:
-    '''A class which combines all data relative to a language group.'''
+    r'''A class which combines all data relative to a language group.'''
     
-    def __init__(self, sentence, language, vowels, consonants, idd=None, *args, **kwargs):
-        '''
+    def __init__(self, sentence: str, language: dict, vowels: List[str], consonants: List[str], idd: Optional[str] = None, *args, **kwargs) -> None:
+        r'''
         Init method for this class.
         
-        :param list consonants: list of consonants in the sentence
-        :param dict language: dictionary representing the considered language
         :param str sentence: main sentence which is going to be modified
+        :param dict language: dictionary representing the considered language
         :param list vowels: list of vowels in the sentence
+        :param list consonants: list of consonants in the sentence
         
         :param str idd: (**Optional**) identifier for this language group
         '''
         
+        #: Identifier
         self.id          = idd
         
         # Keep track of sentences each turn in a list
@@ -46,10 +48,8 @@ class LanguageGroup:
                             'Swap'            : self.Swap
                            }
         
-        
-        
-    def applyRule(self, rule, *args, **kwargs):
-        ''''
+    def applyRule(self, rule: str, *args, **kwargs) -> str:
+        r''''
         Apply a given rule to the current sentence.
         
         :param str rule: rule to apply
@@ -59,7 +59,7 @@ class LanguageGroup:
         '''
         
         if rule not in self.ruleMethods:
-            print('No rule %s found in rules methods %s' %(rule, self.ruleMethods.keys()))
+            print(f'No rule {rule} found in rules methods {self.ruleMethods.keys()}')
             msg = None
         else:
             msg = self.ruleMethods[rule](len(self.sentence))
@@ -71,9 +71,8 @@ class LanguageGroup:
     #              Rules              #
     ###################################
     
-    # Consonants
-    def ContoCon_All(self, turn, *args, **kwargs):
-        ''''
+    def ContoCon_All(self, turn: str, *args, **kwargs) -> str:
+        r''''
         Consonant to consonant on all words rule.
         
         :param str turn: name of the turn to put in the sentence dict
@@ -98,15 +97,15 @@ class LanguageGroup:
             self.sentence.append(sentence)
             
             # Message to output for admin mode
-            msg         = 'Turn %s: %s changed consonant %s to consonant %s in every word.' %(turn, self.id, consonant_out, consonant_in)
+            msg         = f'Turn {turn}: {self.id} changed consonant {consonant_out} to consonant {consonant_in} in every word.'
         else:
             self.sentence.append(self.sentence[-1])
-            msg         = 'Turn %s: %s made no modifications because no consonant was found in the sentence.' %(turn, self.id)
+            msg         = f'Turn {turn}: {self.id} made no modifications because no consonant was found in the sentence.'
         
         return msg
         
-    def ContoCon_Single(self, turn, *args, **kwargs):
-        ''''
+    def ContoCon_Single(self, turn: str, *args, **kwargs) -> str:
+        r''''
         Consonant to consonant on a single word rule.
         
         :param str turn: name of the turn to put in the sentence dict
@@ -132,16 +131,15 @@ class LanguageGroup:
             self.sentence.append(sentence)
         
             # Message to output for admin mode
-            msg             = 'Turn %s: %s changed consonant %s to consonant %s in word %s.' %(turn, self.id, consonant_out, consonant_in, word)
+            msg             = f'Turn {turn}: {self.id} changed consonant {consonant_out} to consonant {consonant_in} in word {word}.'
         else:
             self.sentence.append(self.sentence[-1])
-            msg             = 'Turn %s: %s made no modifications because no consonant was found in sentence.' %(turn, self.id)
+            msg             = f'Turn {turn}: {self.id} made no modifications because no consonant was found in sentence.' 
             
         return msg
     
-    # Swap words
-    def Swap(self, turn, *args, **kwargs):
-        '''
+    def Swap(self, turn: str, *args, **kwargs) -> str:
+        r'''
         Swap two consecutive words rule.
         
         :param str turn: name of the turn to put in the sentence dict
@@ -162,16 +160,15 @@ class LanguageGroup:
             self.sentence.append(sentence)
             
             # Message to output for admin mode
-            msg      = 'Turn %s: %s swaped word %s with word %s.' %(turn, self.id, word1, word2)
+            msg      = f'Turn {turn}: {self.id} swaped word {word1} with word {word2}.'
         else:
             self.sentence.append(self.sentence[-1])
-            msg      = 'Turn %s: %s made no modifications because no words could be swaped.' %(turn, self.id)
+            msg      = f'Turn {turn}: {self.id} made no modifications because no words could be swaped.'
             
         return msg
     
-    # Vowels
-    def VowtoVow_All(self, turn, *args, **kwargs):
-        ''''
+    def VowtoVow_All(self, turn: str, *args, **kwargs) -> str:
+        r''''
         Vowel to vowel on all words rule.
         
         :param str turn: name of the turn to put in the sentence dict
@@ -196,15 +193,15 @@ class LanguageGroup:
             self.sentence.append(sentence)
             
             # Message to output for admin mode
-            msg         = 'Turn %s: %s changed vowel %s to vowel %s in every word.' %(turn, self.id, vowel_out, vowel_in)
+            msg         = f'Turn {turn}: {self.id} changed vowel {vowel_out} to vowel {vowel_in} in every word.'
         else:
             self.sentence.append(self.sentence[-1])
-            msg         = 'Turn %s: %s made no modifications because no vowel was found in the sentence.' %(turn, self.id)
+            msg         = f'Turn {turn}: {self.id} made no modifications because no vowel was found in the sentence.'
         
         return msg
         
-    def VowtoVow_Single(self, turn, *args, **kwargs):
-        ''''
+    def VowtoVow_Single(self, turn: str, *args, **kwargs) -> str:
+        r''''
         Vowel to vowel on a single word rule.
         
         :param str turn: name of the turn to put in the sentence dict
@@ -230,10 +227,10 @@ class LanguageGroup:
             self.sentence.append(sentence)
         
             # Message to output for admin mode
-            msg         = 'Turn %s: %s changed vowel %s to vowel %s in word %s.' %(turn, self.id, vowel_out, vowel_in, word)
+            msg         = f'Turn {turn}: {self.id} changed vowel {vowel_out} to vowel {vowel_in} in word {word}.'
         else:
             self.sentence.append(self.sentence[-1])
-            msg         = 'Turn %s: %s made no modifications because no vowel was found in sentence.' %(turn, self.id)
+            msg         = f'Turn {turn}: {self.id} made no modifications because no vowel was found in sentence.'
             
         return msg
 
@@ -242,8 +239,8 @@ class LanguageGroup:
 #          Loading utilities          #
 #######################################
 
-def loadCorpus(scriptPath, corpusFile):
-   '''
+def loadCorpus(scriptPath: str, corpusFile: str) -> Union[str, bool, str]:
+   r'''
    Load a corpus file.
 
    :param str scriptPath: path where the main program is located
@@ -257,14 +254,15 @@ def loadCorpus(scriptPath, corpusFile):
    file       = opath.join(path, corpusFile)
 
    if not opath.isfile(file):
-      return '', False, 'No corpus file %s found in %s directory.' %(corpusFile, path)
+      return '', False, f'No corpus file {corpusFile} found in {path} directory.'
    else:
       with open(file, 'r') as f:
          text = f.read()
-         return text, True, ''
+         
+      return text, True, ''
 
-def loadIcons(scriptPath, formats=['xbm', 'xpm', 'png', 'bmp', 'gif', 'jpg', 'jpeg', 'pbm', 'pgm', 'ppm']):
-   '''
+def loadIcons(scriptPath: str, formats: List[str] = ['xbm', 'xpm', 'png', 'bmp', 'gif', 'jpg', 'jpeg', 'pbm', 'pgm', 'ppm']) -> Union[dict, bool, str]:
+   r'''
    Load icons appearing in the given icon directory as QIcons objects.
 
    :param str scriptPath: path where the main program is located
@@ -293,12 +291,12 @@ def loadIcons(scriptPath, formats=['xbm', 'xpm', 'png', 'bmp', 'gif', 'jpg', 'jp
       msg           = ''
    else:
       ok            = False
-      msg           = 'Icons path %s could not be found.' %path
+      msg           = f'Icons path {path} not found.'
 
    return conf, ok, msg
 
-def loadLanguage(scriptPath, languageFile, alt=True):
-   '''
+def loadLanguage(scriptPath: str, languageFile: str, alt: bool = True) -> Union[dict, bool, str]:
+   r'''
    Load and setup language properties.
 
    :param str scriptPath: path where the main program is located
@@ -337,7 +335,7 @@ def loadLanguage(scriptPath, languageFile, alt=True):
             elif letter in conf['vowels']:
                conf['vowels']     += alterations
             else:
-               print('Alterations %s of letter %s could not be broadcast to neither consonants, nor vowels.' %(alterations, letter))
+               print(f'Alterations {alterations} of letter {letter} could not be broadcast to neither consonants, nor vowels.')
 
       conf.pop('alterations')
       ok      = True
@@ -345,11 +343,38 @@ def loadLanguage(scriptPath, languageFile, alt=True):
    else:
       conf    = {}
       ok      = False
-      msg     = 'Language file %s could not be found.' %file
+      msg     = f'Language file {file} not found.'
 
    return conf, ok, msg
 
-def loadTranslation(scriptPath, transFile, transPath='translations'):
+def loadThemes(scriptPath: str, defaultFile: str = '', themePath: str = 'themes') -> Union[dict, bool, str]:
+    r'''
+    Find theme files and check that default file exists.
+    
+    :param str scriptPath: path where the main program is located
+    
+    :param str defaultFile: (**Optional**) default theme file
+    :param str themePath: (**Optional**) path where the themes files are located
+    
+    :raises IOError: if **defaultFile** is not found in the theme directory.
+    '''
+    
+    path    = opath.join(scriptPath, themePath)
+    files   = glob(opath.join(path, '*.qss'))
+    file    = opath.join(path, defaultFile)
+    
+    conf    = {'themes' : files, 'theme' : file}
+    if opath.isfile(file) and file in files:
+        ok  = True
+        msg = ''
+    else:
+        ok  = False
+        msg = f'Theme file {file} not found.'
+        
+    return conf, ok, msg
+    
+
+def loadTranslation(scriptPath: str, transFile: str, transPath:str = 'translations') -> Union[dict, bool, str]:
     '''
     Load and setup interface language.
 
@@ -367,21 +392,26 @@ def loadTranslation(scriptPath, transFile, transPath='translations'):
     
     conf                   = {'translations' : files}
     if opath.isfile(file):
-       
         conf['trans_prop'] = setupTranslation(file)
         conf['trans_name'] = transFile.rsplit('.yaml')[0]
         ok                 = True
         msg                = ''
     else:
         ok                 = False
-        msg                = 'Translation file %s could not be fonud.' %file
+        msg                = f'Translation file {file} not found.'
     
     return conf, ok, msg
  
-def saveConfig(file, corpus=None, interface=None, language=None, alterations=None, rules=None):
-   '''Save settings into configuration file.'''
+def saveConfig(file: str, 
+               corpus:str = None, 
+               interface:str = None, 
+               language:str = None, 
+               alterations: bool = None, 
+               rules: dict = None,
+               theme: str = None) -> None:
+   r'''Save settings into configuration file.'''
    
-   if None in [corpus, interface, language, alterations, rules]:
+   if None in [corpus, interface, language, alterations, rules, theme]:
       raise ValueError('One of the variables in saveConfig is None.')
    
    # Build out dict and yaml string
@@ -389,6 +419,7 @@ def saveConfig(file, corpus=None, interface=None, language=None, alterations=Non
             'interfaceLanguage'   : interface + '.yaml',
             'language'            : language,
             'languageAlterations' : alterations,
+            'theme'               : theme,
             'rules'               : rules
            }
    
@@ -399,8 +430,8 @@ def saveConfig(file, corpus=None, interface=None, language=None, alterations=Non
    
    return
 
-def setupTranslation(file):
-    '''Utility function to easily change translation. See loadTranslation.'''
+def setupTranslation(file: str):
+    r'''Utility function to easily change translation. See loadTranslation.'''
     
     with open(file, 'r') as f:
         trans = yaml.load(f, Loader=yaml.Loader)
@@ -412,8 +443,8 @@ def setupTranslation(file):
 #          INITIAL SETUP          #
 ###################################
 
-def setup(scriptPath, configFile, parent=None):
-   '''
+def setup(scriptPath: str, configFile: str, parent: Any = None) -> Union[dict, bool, str]:
+   r'''
    Setup program at startup.
 
    :param parent: parent widget calling this function. If None, nothing is done.
@@ -443,7 +474,10 @@ def setup(scriptPath, configFile, parent=None):
          parent.splashlabel.setText('Loading icons...')
          parent.root.processEvents()
 
-      # 1) Generate icons
+      ################################
+      #        Generate icons        #
+      ################################
+      
       icons, ok, msg            = loadIcons(scriptPath)
 
       if not ok:
@@ -456,7 +490,10 @@ def setup(scriptPath, configFile, parent=None):
          parent.splashlabel.setText('Loading corpus...')
          parent.root.processEvents()
 
-      # 2) Load default corpus file if not empty
+      #################################################################
+      #             Load default corpus file if not empty             #
+      #################################################################
+      
       corpusFile                = conf['corpus']
       text, ok, msg             = loadCorpus(scriptPath, corpusFile)
 
@@ -469,8 +506,11 @@ def setup(scriptPath, configFile, parent=None):
       if parent is not None:
          parent.splashlabel.setText('Building language...')
          parent.root.processEvents()
-
-      # 3) Build default language dict
+      
+      ###################################################
+      #           Build default language dict           #
+      ###################################################
+      
       languageFile              = conf['language']
       alterations               = conf['languageAlterations']
       language, ok, msg         = loadLanguage(scriptPath, languageFile, alt=alterations)
@@ -489,7 +529,10 @@ def setup(scriptPath, configFile, parent=None):
          parent.splashlabel.setText('Setup interface language...')
          parent.root.processEvents()
 
-      # 4) Load translation file
+      ###################################################
+      #              Load translation file              #
+      ###################################################
+      
       translation, ok, msg      = loadTranslation(scriptPath, conf['interfaceLanguage'])
 
       if not ok:
@@ -499,5 +542,17 @@ def setup(scriptPath, configFile, parent=None):
       conf['trans_prop']        = translation['trans_prop']
       conf['trans_name']        = translation['trans_name']
       conf.pop('interfaceLanguage')
+      
+      ###################################
+      #           Load themes           #
+      ###################################
+      
+      themes, ok, msg           = loadThemes(scriptPath, defaultFile = conf['theme'])
+      
+      if not ok:
+         return {}, ok, msg
+     
+      conf['theme']             = themes['theme']
+      conf['themes']            = themes['themes']
 
       return conf, ok, msg

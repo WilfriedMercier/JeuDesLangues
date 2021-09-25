@@ -22,7 +22,7 @@ rules:
       widget: rulesLet_Let_A
     LettoLet_Single:
       method: setCheckState
-      value: false
+      value: true
       widget: rulesLet_Let_S
     Swap:
       method: setCheckState
@@ -30,7 +30,7 @@ rules:
       widget: rulesSwap
     VowtoVow_All:
       method: setCheckState
-      value: true
+      value: false
       widget: rulesVow_Vow_A
     VowtoVow_Single:
       method: setCheckState
@@ -39,9 +39,10 @@ rules:
   Other_rule:
     nbPlayers:
       method: setValue
-      value: 3
+      value: 4
       widget: rulesNbGrSpin
     nbTurns:
       method: setValue
-      value: 10
+      value: 5
       widget: rulesTurnSpin
+theme: dark.qss
