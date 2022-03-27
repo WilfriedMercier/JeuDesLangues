@@ -533,6 +533,7 @@ def setup(scriptPath: str, configFile: str, parent: Any = None) -> Union[dict, b
       #              Load translation file              #
       ###################################################
       
+      print(f'Loading translation file {conf["interfaceLanguage"]}...')
       translation, ok, msg      = loadTranslation(scriptPath, conf['interfaceLanguage'])
 
       if not ok:
@@ -543,9 +544,13 @@ def setup(scriptPath: str, configFile: str, parent: Any = None) -> Union[dict, b
       conf['trans_name']        = translation['trans_name']
       conf.pop('interfaceLanguage')
       
+      print('Translation loaded.')
+      
       ###################################
       #           Load themes           #
       ###################################
+      
+      print('Loading theme...')
       
       themes, ok, msg           = loadThemes(scriptPath, defaultFile = conf['theme'])
       
@@ -554,5 +559,7 @@ def setup(scriptPath: str, configFile: str, parent: Any = None) -> Union[dict, b
      
       conf['theme']             = themes['theme']
       conf['themes']            = themes['themes']
+      
+      print('Theme loaded.')
 
       return conf, ok, msg

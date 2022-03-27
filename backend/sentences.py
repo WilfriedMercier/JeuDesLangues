@@ -1,17 +1,20 @@
 import nltk
 import random
-
+import os.path as opath
+nltk.download('punkt')
 
 #################################################################################
 #         Extracting sentences, words, consonants, vowels and syllables         #
 #################################################################################
 
-def make_sentences(texts):
+def make_sentences(texts, language='French'):
    '''
    Extract sentences out of a corpus of texts.
 
    :param texts: text or list of texts from which the sentences are extracted
    :type texts: str or list[str]
+   
+   :param str language: language of the text. Must be recognised by nltk.tokenize.punkt module.
 
    :returns: list of sentences
    :rtype: list[str]
@@ -19,13 +22,23 @@ def make_sentences(texts):
 
    if isinstance(texts, str):
       texts         = [texts]
+      
+   detector         = nltk.data.load(opath.join('tokenizers', 'punkt', f'{language.lower()}.pickle'))
+   print(opath.join('tokenizers', 'punkt', f'{language.lower()}.pickle'))
 
    sentences        = []
+   print(f'Generating corpus out of {len(texts)} texts...')
    for text in texts:
          text       = text.replace('-\n', '')
          text       = text.replace('\n', ' ')
-         stcs       = nltk.sent_tokenize(text)
+         
+         print(f'Tokenizing text with {len(text)} characters...')
+         stcs       = detector.tokenize(text[:1000000])
+         print('Tokenizing done.')
+         
          sentences += stcs
+
+   print(f'{len(sentences)} sentences created.')
 
    return sentences
 

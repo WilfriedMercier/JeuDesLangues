@@ -79,8 +79,10 @@ class App(QMainWindow):
          self.rules          = conf['rules']
    
          # Corpus
+         print('Generating corpus...')
          self.corpusName     = conf['corpus']
          self.corpusText     = snt.make_sentences(conf['corpusText'])
+         print('Corpus generated.')
    
          # Icons
          self.icons          = conf['icons']
