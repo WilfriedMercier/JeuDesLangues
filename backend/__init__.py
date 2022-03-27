@@ -241,12 +241,12 @@ class LanguageGroup:
 
 def loadCorpus(scriptPath: str, corpusFile: str) -> Union[str, bool, str]:
    r'''
-   Load a corpus file.
+   Check a corpus file exists and returns its complete path.
 
    :param str scriptPath: path where the main program is located
    :param str corpusFile: name of the corpus ascii file
 
-   :returns: corpus text, ok flag and error message if any
+   :returns: corpus file, ok flag and error message if any
    :rtype: str, boolean, str
    '''
 
@@ -256,10 +256,8 @@ def loadCorpus(scriptPath: str, corpusFile: str) -> Union[str, bool, str]:
    if not opath.isfile(file):
       return '', False, f'No corpus file {corpusFile} found in {path} directory.'
    else:
-      with open(file, 'r') as f:
-         text = f.read()
-         
-      return text, True, ''
+      with open(file, 'r'):
+         return file, True, ''
 
 def loadIcons(scriptPath: str, formats: List[str] = ['xbm', 'xpm', 'png', 'bmp', 'gif', 'jpg', 'jpeg', 'pbm', 'pgm', 'ppm']) -> Union[dict, bool, str]:
    r'''
@@ -495,12 +493,12 @@ def setup(scriptPath: str, configFile: str, parent: Any = None) -> Union[dict, b
       #################################################################
       
       corpusFile                = conf['corpus']
-      text, ok, msg             = loadCorpus(scriptPath, corpusFile)
+      file, ok, msg             = loadCorpus(scriptPath, corpusFile)
 
       if not ok:
          return {}, ok, msg
 
-      conf['corpusText']        = text
+      conf['corpusText']        = file
       
       # Splashscreen
       if parent is not None:

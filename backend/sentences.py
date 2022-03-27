@@ -1,5 +1,6 @@
 import nltk
 import random
+import pickle
 import os.path as opath
 nltk.download('punkt')
 
@@ -7,38 +8,39 @@ nltk.download('punkt')
 #         Extracting sentences, words, consonants, vowels and syllables         #
 #################################################################################
 
-def make_sentences(texts, language='French'):
+def make_sentences(file: str, language: str = 'French') -> list[str]:
    '''
-   Extract sentences out of a corpus of texts.
+   Extract sentences out of a corpus file.
 
-   :param texts: text or list of texts from which the sentences are extracted
-   :type texts: str or list[str]
+   :param str file: file from which the sentences are extracted
    
-   :param str language: language of the text. Must be recognised by nltk.tokenize.punkt module.
+   :param str language: (**Optional**) language of the text. Must be recognised by nltk.tokenize.punkt module.
 
    :returns: list of sentences
    :rtype: list[str]
    '''
-
-   if isinstance(texts, str):
-      texts         = [texts]
       
-   detector         = nltk.data.load(opath.join('tokenizers', 'punkt', f'{language.lower()}.pickle'))
-   print(opath.join('tokenizers', 'punkt', f'{language.lower()}.pickle'))
-
-   sentences        = []
-   print(f'Generating corpus out of {len(texts)} texts...')
-   for text in texts:
-         text       = text.replace('-\n', '')
-         text       = text.replace('\n', ' ')
-         
-         print(f'Tokenizing text with {len(text)} characters...')
-         stcs       = detector.tokenize(text[:1000000])
-         print('Tokenizing done.')
-         
-         sentences += stcs
-
+   detector    = nltk.data.load(opath.join('tokenizers', 'punkt', f'{language.lower()}.pickle'))
+   sentences   = []
+   
+   # Check that there is not already a pickled object there to avoid generating the sentences again
+   path, fname = opath.split(file)
+   pickled     = opath.join(path, f'{fname.rsplit(".txt", maxsplit=1)[0]}.pickle')
+   if opath.exists(pickled):
+      print(f'Loading pickled object {pickled}...')
+      with open(pickled, 'rb') as f:
+         return pickle.load(f)
+   else:
+      with open(file, 'r') as f:
+         text  = f.read().replace('-\n', '').replace('\n', ' ')
+      
+   print(f'Tokenizing text with {len(text)} characters...')
+   sentences   = detector.tokenize(text[:3000000])
    print(f'{len(sentences)} sentences created.')
+   
+   print('Pickling for later usage...')
+   with open(pickled, 'wb') as f:
+      pickle.dump(sentences, f)
 
    return sentences
 
